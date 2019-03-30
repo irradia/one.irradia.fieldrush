@@ -10,7 +10,7 @@ interface FRParserArrayType<T> : FRValueParserType<T> {
    * Called when the parsers for all indices have completed successfully.
    */
 
-  fun onIndicesCompleted(
+  fun onCompleted(
     context: FRParserContextType)
     : FRParseResult<T>
 

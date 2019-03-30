@@ -10,17 +10,16 @@ interface FRParserObjectType<T> : FRValueParserType<T> {
    * Called if the executions of all parsers for all fields succeeded.
    */
 
-  fun onFieldsCompleted(
+  fun onCompleted(
     context: FRParserContextType)
     : FRParseResult<T>
 
   /**
-   * Return a parser for the given named field, or `null` if the field should be ignored.
+   * Return the schema for the object.
    */
 
-  fun forField(
-    context: FRParserContextType,
-    name: String)
-    : FRValueParserType<*>?
+  fun schema(
+    context: FRParserContextType)
+    : FRParserObjectSchema
 
 }

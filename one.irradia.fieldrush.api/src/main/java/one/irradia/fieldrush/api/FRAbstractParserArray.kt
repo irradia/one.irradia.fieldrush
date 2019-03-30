@@ -57,7 +57,7 @@ abstract class FRAbstractParserArray<T>(
     context.jsonParser.nextToken()
 
     return if (errors.isEmpty()) {
-      this.onIndicesCompleted(context)
+      this.onCompleted(context)
         .flatMap { items ->
           this.onReceive.invoke(context, items)
           FRParseResult.succeed(items)

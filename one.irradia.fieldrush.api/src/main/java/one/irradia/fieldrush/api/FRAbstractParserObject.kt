@@ -26,6 +26,13 @@ abstract class FRAbstractParserObject<T>(
     val errors = mutableListOf<FRParseError>()
     context.jsonParser.nextToken()
 
+    val schema = this.schema(context)
+    val requiredFieldNames =
+      schema.fieldsByName
+        .filterValues { fieldSchema -> !fieldSchema.isOptional }
+        .map { fieldSchema -> fieldSchema.key }
+        .toMutableSet()
+
     while (true) {
       if (context.jsonParser.currentToken == JsonToken.END_OBJECT) {
         break
@@ -36,10 +43,11 @@ abstract class FRAbstractParserObject<T>(
         "Current token ${context.jsonParser.currentToken} must be ${JsonToken.FIELD_NAME}")
 
       val fieldName = context.jsonParser.currentName
-      val parser = this.forField(context, fieldName)
+      val fieldSchema = schema.fieldsByName[fieldName]
       context.jsonParser.nextToken()
 
-      if (parser != null) {
+      if (fieldSchema != null) {
+        val parser = fieldSchema.parser.invoke()
         context.trace(this.javaClass, "created field parser ${parser.javaClass.simpleName} for $fieldName")
         val result = parser.parse(context.withNextDepth())
         when (result) {
@@ -47,6 +55,7 @@ abstract class FRAbstractParserObject<T>(
           is FRParseFailed -> errors.addAll(result.errors)
         }
 
+        requiredFieldNames.remove(fieldName)
         context.trace(this.javaClass, "completed field parser ${parser.javaClass.simpleName} for $fieldName")
       } else {
         context.trace(this.javaClass, "no field parser for field $fieldName")
@@ -61,8 +70,18 @@ abstract class FRAbstractParserObject<T>(
     context.trace(this.javaClass, "end: ${context.jsonParser.currentToken}")
     context.jsonParser.nextToken()
 
-    return if (errors.isEmpty()) {
-      this.onFieldsCompleted(context)
+    for (name in requiredFieldNames) {
+      errors.add(context.errorOf("Missing a required field '${name}'"))
+    }
+
+    return parseFinish(errors, context)
+  }
+
+  private fun parseFinish(
+    errors: MutableList<FRParseError>,
+    context: FRParserContextType): FRParseResult<T> =
+    if (errors.isEmpty()) {
+      this.onCompleted(context)
         .flatMap { result ->
           this.onReceive.invoke(context, result)
           FRParseSucceeded(result)
@@ -70,7 +89,6 @@ abstract class FRAbstractParserObject<T>(
     } else {
       FRParseFailed(errors.toList())
     }
-  }
 
   private fun skip(context: FRParserContextType) {
     val before = context.jsonParser.currentToken

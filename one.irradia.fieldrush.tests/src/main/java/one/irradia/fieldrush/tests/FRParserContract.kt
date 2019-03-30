@@ -4,6 +4,8 @@ import one.irradia.fieldrush.api.FRAbstractParserArray
 import one.irradia.fieldrush.api.FRAbstractParserObject
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserContextType
+import one.irradia.fieldrush.api.FRParserObjectFieldSchema
+import one.irradia.fieldrush.api.FRParserObjectSchema
 import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
@@ -64,12 +66,12 @@ abstract class FRParserContract {
   }
 
   class IgnoreAll : FRAbstractParserObject<Unit>(onReceive = FRValueParsers.ignoringReceiverWithContext()) {
-    override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<Unit> {
-      return FRParseResult.succeed(Unit)
+    override fun schema(context: FRParserContextType): FRParserObjectSchema {
+      return FRParserObjectSchema(listOf())
     }
 
-    override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
-      return null
+    override fun onCompleted(context: FRParserContextType): FRParseResult<Unit> {
+      return FRParseResult.succeed(Unit)
     }
   }
 
@@ -285,29 +287,19 @@ abstract class FRParserContract {
   class PointParser(
     onReceive: (FRParserContextType, Point) -> Unit = FRValueParsers.ignoringReceiverWithContext())
     : FRAbstractParserObject<Point>(onReceive) {
+
     private var x: BigInteger? = null
     private var y: BigInteger? = null
     private var z: BigInteger? = null
 
-    override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<Point> {
-      val vx = x
-      val vy = y
-      val vz = z
-      return if (vx != null && vy != null && vz != null) {
-        FRParseResult.succeed(Point(vx, vy, vz))
-      } else {
-        context.failureOf("Missing one or more required fields (x, y, or z)")
-      }
-    }
+    override fun schema(context: FRParserContextType): FRParserObjectSchema =
+      FRParserObjectSchema(listOf(
+        FRParserObjectFieldSchema("x", { FRValueParsers.forInteger { i -> this.x = i } }),
+        FRParserObjectFieldSchema("y", { FRValueParsers.forInteger { i -> this.y = i } }),
+        FRParserObjectFieldSchema("z", { FRValueParsers.forInteger { i -> this.z = i } })))
 
-    override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
-      return when (name) {
-        "x" -> FRValueParsers.forInteger { value -> this.x = value }
-        "y" -> FRValueParsers.forInteger { value -> this.y = value }
-        "z" -> FRValueParsers.forInteger { value -> this.z = value }
-        else -> null
-      }
-    }
+    override fun onCompleted(context: FRParserContextType): FRParseResult<Point> =
+      FRParseResult.succeed(Point(this.x!!, this.y!!, this.z!!))
   }
 
   @Test
@@ -315,7 +307,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-ok-0.json"),
-      rootParser = PointParser { _, _ -> })
+      rootParser = PointParser())
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -375,8 +367,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Missing one or more required fields"))
+        Assert.assertEquals(3, failed.errors.size)
+        Assert.assertThat(failed.errors[0].message, StringContains("Missing a required field 'x'"))
+        Assert.assertThat(failed.errors[1].message, StringContains("Missing a required field 'y'"))
+        Assert.assertThat(failed.errors[2].message, StringContains("Missing a required field 'z'"))
       }
   }
 
@@ -419,7 +413,7 @@ abstract class FRParserContract {
     FRAbstractParserArray<Point>(onReceive) {
     private val points = mutableListOf<Point>()
 
-    override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
+    override fun onCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
       return FRParseResult.succeed(this.points.toList())
     }
 
@@ -536,7 +530,7 @@ abstract class FRParserContract {
     FRAbstractParserArray<Point>(onReceive) {
     private val points = mutableListOf<Point>()
 
-    override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
+    override fun onCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
       return FRParseResult.succeed(this.points.toList())
     }
 

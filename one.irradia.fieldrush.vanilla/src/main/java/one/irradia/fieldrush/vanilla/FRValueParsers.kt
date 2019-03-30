@@ -2,6 +2,7 @@ package one.irradia.fieldrush.vanilla
 
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserContextType
+import one.irradia.fieldrush.api.FRParserObjectSchema
 import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.mime.api.MIMEType
@@ -16,10 +17,10 @@ import java.net.URI
 object FRValueParsers : FRValueParserProviderType {
 
   override fun <T> forObjectWithContext(
-    forField: (FRParserContextType, String) -> FRValueParserType<*>,
-    onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
+    onSchema: (FRParserContextType) -> FRParserObjectSchema,
+    onCompleted: (FRParserContextType) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> {
-    return FRParserObject(receiver, onFieldsCompleted, forField)
+    return FRParserObject(receiver, onCompleted, onSchema)
   }
 
   override fun <T> forArrayMonomorphicWithContext(

@@ -3,7 +3,7 @@ package one.irradia.fieldrush.vanilla
 import one.irradia.fieldrush.api.FRAbstractParserObject
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserContextType
-import one.irradia.fieldrush.api.FRValueParserType
+import one.irradia.fieldrush.api.FRParserObjectSchema
 
 /**
  * An object parser that receives behaviour as functions.
@@ -12,14 +12,12 @@ import one.irradia.fieldrush.api.FRValueParserType
 class FRParserObject<T>(
   receiver: (FRParserContextType, T) -> Unit,
   private val onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
-  private val forField: (FRParserContextType, String) -> FRValueParserType<*>)
+  private val onSchema: (FRParserContextType) -> FRParserObjectSchema)
   : FRAbstractParserObject<T>(receiver) {
 
-  override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<T> {
-    return this.onFieldsCompleted.invoke(context)
-  }
+  override fun schema(context: FRParserContextType): FRParserObjectSchema =
+    this.onSchema.invoke(context)
 
-  override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
-    return this.forField.invoke(context, name)
-  }
+  override fun onCompleted(context: FRParserContextType): FRParseResult<T> =
+    this.onFieldsCompleted.invoke(context)
 }

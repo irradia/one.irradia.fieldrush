@@ -54,5 +54,5 @@ interface FRParserContextType {
   fun <T> failureOf(
     message: String,
     exception: Exception? = null): FRParseResult<T>
-  
+
 }

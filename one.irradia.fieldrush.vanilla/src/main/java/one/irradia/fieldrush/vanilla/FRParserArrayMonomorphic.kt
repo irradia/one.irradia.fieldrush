@@ -16,7 +16,7 @@ class FRParserArrayMonomorphic<T>(
 
   private val values = mutableListOf<T>()
 
-  override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<T>> {
+  override fun onCompleted(context: FRParserContextType): FRParseResult<List<T>> {
     return FRParseResult.succeed(this.values.toList())
   }
 

@@ -133,8 +133,8 @@ interface FRValueParserProviderType {
    */
 
   fun <T> forObjectWithContext(
-    forField: (FRParserContextType, String) -> FRValueParserType<*>,
-    onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
+    onSchema: (FRParserContextType) -> FRParserObjectSchema,
+    onCompleted: (FRParserContextType) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit = ignoringReceiverWithContext())
     : FRValueParserType<T>
 
@@ -143,13 +143,13 @@ interface FRValueParserProviderType {
    */
 
   fun <T> forObject(
-    forField: (String) -> FRValueParserType<*>,
-    onFieldsCompleted: () -> FRParseResult<T>,
+    onSchema: (FRParserContextType) -> FRParserObjectSchema,
+    onCompleted: () -> FRParseResult<T>,
     receiver: (T) -> Unit = ignoringReceiver())
     : FRValueParserType<T> {
     return this.forObjectWithContext(
-      forField = { _, field -> forField.invoke(field) },
-      onFieldsCompleted = { onFieldsCompleted.invoke() },
+      onSchema = { context -> onSchema.invoke(context) },
+      onCompleted = { onCompleted.invoke() },
       receiver = { _, value -> receiver.invoke(value) })
   }
 
