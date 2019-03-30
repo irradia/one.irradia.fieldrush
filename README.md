@@ -4,7 +4,7 @@ one.irradia.fieldrush
 [![Build Status](https://img.shields.io/travis/irradia/one.irradia.fieldrush.svg?style=flat-square)](https://travis-ci.org/irradia/one.irradia.fieldrush)
 [![Maven Central](https://img.shields.io/maven-central/v/one.irradia.fieldrush/one.irradia.fieldrush.api.svg?style=flat-square)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22one.irradia.fieldrush%22)
 [![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/one.irradia.fieldrush/one.irradia.fieldrush.api.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/one.irradia.fieldrush/)
-[![Codacy Badge](https://img.shields.io/codacy/grade/CODACY_TOKEN.svg?style=flat-square)](https://www.codacy.com/app/github_79/one.irradia.fieldrush?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=irradia/one.irradia.fieldrush&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://img.shields.io/codacy/grade/a3e668a39b864af3ade820e5e637778b.svg?style=flat-square)](https://www.codacy.com/app/github_79/one.irradia.fieldrush?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=irradia/one.irradia.fieldrush&amp;utm_campaign=Badge_Grade)
 [![Codecov](https://img.shields.io/codecov/c/github/irradia/one.irradia.fieldrush.svg?style=flat-square)](https://codecov.io/gh/irradia/one.irradia.fieldrush)
 [![Gitter](https://badges.gitter.im/irradia-org/community.svg)](https://gitter.im/irradia-org/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
