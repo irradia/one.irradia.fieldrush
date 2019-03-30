@@ -13,8 +13,8 @@ one.irradia.fieldrush
 ## Features
 
 * High-performance, low-allocation, type-safe, recovering stream parser for constructing data as it is parsed
-* Uses [jackson](https://github.com/FasterXML/jackson) internally for performance and correctness
-* Functional API for the correct construction/validation of data values during parsing
+* Uses the [Jackson](https://github.com/FasterXML/jackson) stream parser internally for performance and correctness
+* Declarative, functional API for the correct construction/validation of data values during parsing
 * ISC license
 * High coverage automated test suite
 
