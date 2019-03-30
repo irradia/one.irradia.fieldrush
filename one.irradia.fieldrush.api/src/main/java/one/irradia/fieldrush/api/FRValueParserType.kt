@@ -12,10 +12,4 @@ interface FRValueParserType<T> {
 
   fun parse(context: FRParserContextType): FRParseResult<T>
 
-  /**
-   * Receive the result of parsing, assuming that the evaluations of all subparsers succeeded.
-   */
-
-  fun receive(context: FRParserContextType, result: T)
-
 }

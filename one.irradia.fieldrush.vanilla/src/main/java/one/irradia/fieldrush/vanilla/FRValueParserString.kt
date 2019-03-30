@@ -14,7 +14,6 @@ class FRValueParserString(
   override fun ofText(
     context: FRParserContextType,
     text: String): FRParseResult<String> {
-    this.receive(context, text)
     return FRParseSucceeded(text)
   }
 

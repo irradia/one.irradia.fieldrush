@@ -16,14 +16,10 @@ class FRValueParserBoolean(
     text: String): FRParseResult<Boolean> {
     val upper = text.toUpperCase()
     return when (upper) {
-      "TRUE" -> {
-        this.receive(context, true)
+      "TRUE" ->
         FRParseSucceeded(true)
-      }
-      "FALSE" -> {
-        this.receive(context, false)
+      "FALSE" ->
         FRParseSucceeded(false)
-      }
       else ->
         context.failureOf("""Expected: A boolean
             | Received: ${text}""".trimMargin())

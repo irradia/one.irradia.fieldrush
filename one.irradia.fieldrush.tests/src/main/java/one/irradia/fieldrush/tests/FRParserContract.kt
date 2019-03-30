@@ -1,9 +1,11 @@
 package one.irradia.fieldrush.tests
 
+import one.irradia.fieldrush.api.FRAbstractParserArray
 import one.irradia.fieldrush.api.FRAbstractParserObject
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserContextType
 import one.irradia.fieldrush.api.FRParserProviderType
+import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.fieldrush.vanilla.FRValueParsers
 import one.irradia.mime.vanilla.MIMEParser
@@ -22,10 +24,11 @@ import java.net.URI
 abstract class FRParserContract {
 
   abstract fun parsers(): FRParserProviderType
-
+  abstract fun valueParsers(): FRValueParserProviderType
   abstract fun logger(): Logger
 
   private lateinit var parsers: FRParserProviderType
+  private lateinit var valueParsers: FRValueParserProviderType
   private lateinit var logger: Logger
 
   @JvmField
@@ -56,20 +59,17 @@ abstract class FRParserContract {
   @Before
   fun testSetup() {
     this.parsers = this.parsers()
+    this.valueParsers = this.valueParsers()
     this.logger = this.logger()
   }
 
-  class IgnoreAll : FRAbstractParserObject<Unit>() {
+  class IgnoreAll : FRAbstractParserObject<Unit>(onReceive = FRValueParsers.ignoringReceiver()) {
     override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<Unit> {
       return FRParseResult.succeed(Unit)
     }
 
     override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
       return null
-    }
-
-    override fun receive(context: FRParserContextType, result: Unit) {
-
     }
   }
 
@@ -283,7 +283,8 @@ abstract class FRParserContract {
     val y: BigInteger,
     val z: BigInteger)
 
-  class PointParser: FRAbstractParserObject<Point>() {
+  class PointParser(
+    onReceive: (FRParserContextType, Point) -> Unit = FRValueParsers.ignoringReceiver()): FRAbstractParserObject<Point>(onReceive) {
     private var x: BigInteger? = null
     private var y: BigInteger? = null
     private var z: BigInteger? = null
@@ -307,10 +308,6 @@ abstract class FRParserContract {
         else -> null
       }
     }
-
-    override fun receive(context: FRParserContextType, result: Point) {
-
-    }
   }
 
   @Test
@@ -318,7 +315,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-ok-0.json"),
-      rootParser = PointParser())
+      rootParser = PointParser { _, _ -> })
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -336,7 +333,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-ok-1.json"),
-      rootParser = PointParser())
+      rootParser = PointParser { _, _ -> })
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -354,7 +351,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-0.json"),
-      rootParser = PointParser())
+      rootParser = PointParser { _, _ -> })
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -372,7 +369,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-1.json"),
-      rootParser = PointParser())
+      rootParser = PointParser { _, _ -> })
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -388,7 +385,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-2.json"),
-      rootParser = PointParser())
+      rootParser = PointParser { _, _ -> })
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -414,6 +411,159 @@ abstract class FRParserContract {
         Assert.assertThat(failed.errors[0].message, StringContains("Expected: A scalar value"))
         Assert.assertThat(failed.errors[1].message, StringContains("Expected: A scalar value"))
         Assert.assertThat(failed.errors[2].message, StringContains("Expected: A scalar value"))
+      }
+  }
+
+  class ArrayPointParser(
+    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiver()):
+    FRAbstractParserArray<Point>(onReceive) {
+    private val points = mutableListOf<Point>()
+
+    override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
+      return FRParseResult.succeed(this.points.toList())
+    }
+
+    override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*>? {
+      return PointParser(onReceive = { _, point -> this.points.add(point) })
+    }
+  }
+
+  @Test
+  fun testArrayPointOK0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = ArrayPointParser())
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+
+        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+
+        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+      }
+  }
+
+  @Test
+  fun testArrayPointMonoOK1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = this.valueParsers.forArrayMonomorphic({ PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+
+        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+
+        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+      }
+  }
+
+  @Test
+  fun testArrayPointBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-bad-0.json"),
+      rootParser = ArrayPointParser())
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(3, failed.errors.size)
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+        Assert.assertThat(failed.errors[1].message, StringContains("Expected: '{'"))
+        Assert.assertThat(failed.errors[2].message, StringContains("Expected: '{'"))
+      }
+  }
+
+  @Test
+  fun testArrayPointBad1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-bad-1.json"),
+      rootParser = ArrayPointParser())
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(1, failed.errors.size)
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '['"))
+      }
+  }
+
+  @Test
+  fun testArrayIntBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-int-bad-0.json"),
+      rootParser = this.valueParsers.forArrayMonomorphic({ this.valueParsers.forInteger() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(1, failed.errors.size)
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: A scalar value"))
+      }
+  }
+
+  class ArraySkippingPointParser(
+    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiver(),
+    val skip: Set<Int>):
+    FRAbstractParserArray<Point>(onReceive) {
+    private val points = mutableListOf<Point>()
+
+    override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<Point>> {
+      return FRParseResult.succeed(this.points.toList())
+    }
+
+    override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*>? {
+      return if (!this.skip.contains(index)) {
+        PointParser(onReceive = { _, point -> this.points.add(point) })
+      } else {
+        null
+      }
+    }
+  }
+
+  @Test
+  fun testArrayIgnoreFirstLast0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = ArraySkippingPointParser(skip = setOf(0, 2)))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(4), parsed[0].x)
+        Assert.assertEquals(BigInteger.valueOf(5), parsed[0].y)
+        Assert.assertEquals(BigInteger.valueOf(6), parsed[0].z)
       }
   }
 }

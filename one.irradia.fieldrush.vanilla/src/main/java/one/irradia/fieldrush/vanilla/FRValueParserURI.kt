@@ -17,9 +17,7 @@ class FRValueParserURI(
     context: FRParserContextType,
     text: String): FRParseResult<URI> {
     return try {
-      val value = URI(text)
-      this.receive(context, value)
-      FRParseSucceeded(value)
+      FRParseSucceeded(URI(text))
     } catch (e: URISyntaxException) {
       context.failureOf(
         message = """Problem: ${e.message}

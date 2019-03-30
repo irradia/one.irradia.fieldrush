@@ -16,9 +16,7 @@ class FRValueParserMIME(
 
   override fun ofText(context: FRParserContextType, text: String): FRParseResult<MIMEType> {
     return try {
-      val value = this.parsers.invoke(text).parseOrException()
-      this.receive(context, value)
-      FRParseSucceeded(value)
+      FRParseSucceeded(this.parsers.invoke(text).parseOrException())
     } catch (e: Exception) {
       context.failureOf(
         message = """Problem: ${e.message}

@@ -16,9 +16,7 @@ class FRValueParserInteger(
     context: FRParserContextType,
     text: String): FRParseResult<BigInteger> {
     return try {
-      val value = BigInteger(text)
-      this.receive(context, value)
-      FRParseSucceeded(value)
+      FRParseSucceeded(BigInteger(text))
     } catch (e: NumberFormatException) {
       context.failureOf(
         """Problem: ${e.message}

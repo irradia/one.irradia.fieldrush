@@ -11,10 +11,6 @@ import one.irradia.fieldrush.api.FRValueParserType
 abstract class FRValueParserScalar<T>(
   private val onReceive: (FRParserContextType, T) -> Unit) : FRValueParserType<T> {
 
-  override fun receive(context: FRParserContextType, result: T) {
-    this.onReceive.invoke(context, result)
-  }
-
   /**
    * Called when text must be converted into a more specific type.
    */
@@ -29,6 +25,7 @@ abstract class FRValueParserScalar<T>(
       val text = context.jsonParser.text
       context.jsonParser.nextToken()
       this.ofText(context, text)
+        .map { x -> this.onReceive.invoke(context, x);x }
     } else {
       if (token.isStructStart) {
         context.jsonParser.skipChildren()

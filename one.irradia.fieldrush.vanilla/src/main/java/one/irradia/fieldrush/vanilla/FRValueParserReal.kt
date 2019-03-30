@@ -15,9 +15,7 @@ class FRValueParserReal(
     context: FRParserContextType,
     text: String): FRParseResult<Double> {
     return try {
-      val value = java.lang.Double.parseDouble(text)
-      this.receive(context, value)
-      FRParseSucceeded(value)
+      FRParseSucceeded(java.lang.Double.parseDouble(text))
     } catch (e: NumberFormatException) {
       context.failureOf(
         message = """Problem: ${e.message}

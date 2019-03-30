@@ -1,7 +1,5 @@
 package one.irradia.fieldrush.vanilla
 
-import one.irradia.fieldrush.api.FRAbstractParserArray
-import one.irradia.fieldrush.api.FRAbstractParserObject
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserContextType
 import one.irradia.fieldrush.api.FRValueParserProviderType
@@ -21,40 +19,20 @@ object FRValueParsers : FRValueParserProviderType {
     forField: (FRParserContextType, String) -> FRValueParserType<*>,
     onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> {
+    return FRParserObject(receiver, onFieldsCompleted, forField)
+  }
 
-    return object: FRAbstractParserObject<T>() {
-      override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<T> {
-        return onFieldsCompleted(context)
-      }
-
-      override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
-        return forField(context, name)
-      }
-
-      override fun receive(context: FRParserContextType, result: T) {
-        return receiver.invoke(context, result)
-      }
-    }
+  override fun <T> forArrayMonomorphic(
+    forEach: (FRParserContextType) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, List<T>) -> Unit): FRValueParserType<List<T>> {
+    return FRParserArrayMonomorphic(receiver, forEach)
   }
 
   override fun <T> forArray(
     forIndex: (FRParserContextType, Int) -> FRValueParserType<*>,
     onIndicesCompleted: (FRParserContextType) -> FRParseResult<List<T>>,
     receiver: (FRParserContextType, List<T>) -> Unit): FRValueParserType<List<T>> {
-
-    return object: FRAbstractParserArray<T>() {
-      override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<T>> {
-        return onIndicesCompleted(context)
-      }
-
-      override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*>? {
-        return forIndex(context, index)
-      }
-
-      override fun receive(context: FRParserContextType, result: List<T>) {
-        return receiver.invoke(context, result)
-      }
-    }
+    return FRParserArray(receiver, onIndicesCompleted, forIndex)
   }
 
   override fun forInteger(
@@ -90,13 +68,7 @@ object FRValueParsers : FRValueParserProviderType {
   override fun <T> forScalar(
     validator: (FRParserContextType, String) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> {
-    return object: FRValueParserScalar<T>(receiver), FRValueParserType<T> {
-      override fun ofText(context: FRParserContextType, text: String): FRParseResult<T> {
-        return validator.invoke(context, text)
-      }
-      override fun receive(context: FRParserContextType, result: T) {
-        return receiver.invoke(context, result)
-      }
-    }
+    return FRValueParserValid(receiver, validator)
   }
 }
+

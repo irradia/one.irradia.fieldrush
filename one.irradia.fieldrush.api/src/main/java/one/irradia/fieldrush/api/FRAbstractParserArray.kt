@@ -9,14 +9,18 @@ import one.irradia.fieldrush.api.FRParseResult.FRParseSucceeded
  * An abstract implementation of an array parser.
  */
 
-abstract class FRAbstractParserArray<T> : FRParserArrayType<List<T>> {
+abstract class FRAbstractParserArray<T>(
+  private val onReceive: (FRParserContextType, List<T>) -> Unit) : FRParserArrayType<List<T>> {
 
   override fun parse(context: FRParserContextType): FRParseResult<List<T>> {
     context.trace(this.javaClass, "start: ${context.jsonParser.currentToken}")
 
     if (!context.jsonParser.isExpectedStartArrayToken) {
-      return context.failureOf("""Expected: '['
-          Received: ${context.jsonParser.currentToken}""".trimMargin())
+      val failure =
+        context.failureOf<List<T>>("""Expected: '['
+          | Received: ${context.jsonParser.currentToken}""".trimMargin())
+      this.skip(context)
+      return failure
     }
 
     context.jsonParser.nextToken()
@@ -55,7 +59,7 @@ abstract class FRAbstractParserArray<T> : FRParserArrayType<List<T>> {
     return if (errors.isEmpty()) {
       this.onIndicesCompleted(context)
         .flatMap { items ->
-          this.receive(context, items)
+          this.onReceive.invoke(context, items)
           FRParseResult.succeed(items)
         }
     } else {
