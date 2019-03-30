@@ -11,6 +11,10 @@ import one.irradia.mime.vanilla.MIMEParser
 import java.math.BigInteger
 import java.net.URI
 
+/**
+ * A convenient provider of value parsers.
+ */
+
 object FRValueParsers : FRValueParserProviderType {
 
   override fun <T> forObject(
