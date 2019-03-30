@@ -16,6 +16,7 @@ one.irradia.fieldrush
   is parsed without constructing any intermediate parse trees.
 * Uses the [Jackson](https://github.com/FasterXML/jackson) stream parser internally for performance and correctness
 * Declarative, functional API for the correct construction/validation of data values during parsing
+* Automatic validation that required fields are present
 * ISC license
 * High coverage automated test suite
 
