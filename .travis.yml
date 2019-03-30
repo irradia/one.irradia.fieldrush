@@ -32,7 +32,7 @@ script:
   - adb shell settings put global animator_duration_scale 0 &
   - ./gradlew connectedAndroidTest
   - adb logcat -d | awk NF
-  - bash <(curl -s https://codecov.io/bash) -f ./one.irradia.opds2_0.tests/build/reports/jacoco/debug/jacoco.xml
+  - bash <(curl -s https://codecov.io/bash) -f ./one.irradia.fieldrush.tests/build/reports/jacoco/debug/jacoco.xml
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
