@@ -14,6 +14,7 @@ class FRParserArray<T>(
   private val onIndicesCompleted: (FRParserContextType) -> FRParseResult<List<T>>,
   private val forIndex: (FRParserContextType, Int) -> FRValueParserType<*>)
   : FRAbstractParserArray<T>(receiver) {
+
   override fun onIndicesCompleted(context: FRParserContextType): FRParseResult<List<T>> {
     return this.onIndicesCompleted.invoke(context)
   }

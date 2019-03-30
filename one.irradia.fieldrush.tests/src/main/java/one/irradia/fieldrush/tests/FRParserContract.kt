@@ -63,7 +63,7 @@ abstract class FRParserContract {
     this.logger = this.logger()
   }
 
-  class IgnoreAll : FRAbstractParserObject<Unit>(onReceive = FRValueParsers.ignoringReceiver()) {
+  class IgnoreAll : FRAbstractParserObject<Unit>(onReceive = FRValueParsers.ignoringReceiverWithContext()) {
     override fun onFieldsCompleted(context: FRParserContextType): FRParseResult<Unit> {
       return FRParseResult.succeed(Unit)
     }
@@ -92,7 +92,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("integer-ok-0.json"),
-      rootParser = FRValueParsers.forInteger(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forInteger()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -107,7 +107,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("integer-bad-0.json"),
-      rootParser = FRValueParsers.forInteger(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forInteger()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -121,7 +121,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("boolean-ok-0.json"),
-      rootParser = FRValueParsers.forBoolean(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forBoolean()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -136,7 +136,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("boolean-ok-1.json"),
-      rootParser = FRValueParsers.forBoolean(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forBoolean()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -151,7 +151,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("boolean-bad-0.json"),
-      rootParser = FRValueParsers.forBoolean(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forBoolean()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -165,7 +165,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("real-ok-0.json"),
-      rootParser = FRValueParsers.forReal(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forReal()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -180,7 +180,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("real-bad-0.json"),
-      rootParser = FRValueParsers.forReal(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forReal()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -194,7 +194,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("uri-ok-0.json"),
-      rootParser = FRValueParsers.forURI(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forURI()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -209,7 +209,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("uri-bad-0.json"),
-      rootParser = FRValueParsers.forURI(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forURI()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -223,15 +223,14 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("not-scalar-0.json"),
-      rootParser = FRValueParsers.forScalar(
-        validator = { _, _ -> FRParseResult.succeed(Unit) },
-        receiver = { _, _ -> })).use { parser ->
-      val result = parser.parse()
-      this.dumpParseResult(result)
+      rootParser = FRValueParsers.forScalar({ FRParseResult.succeed(Unit) }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
 
-      val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("A scalar value"))
-    }
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertThat(failed.errors[0].message, StringContains("A scalar value"))
+      }
   }
 
   @Test
@@ -239,7 +238,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("mime-ok-0.json"),
-      rootParser = FRValueParsers.forMIME(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forMIME()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -254,7 +253,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("mime-bad-0.json"),
-      rootParser = FRValueParsers.forMIME(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forMIME()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -268,7 +267,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("string-ok-0.json"),
-      rootParser = FRValueParsers.forString(receiver = { _, _ -> })).use { parser ->
+      rootParser = FRValueParsers.forString()).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
@@ -284,7 +283,8 @@ abstract class FRParserContract {
     val z: BigInteger)
 
   class PointParser(
-    onReceive: (FRParserContextType, Point) -> Unit = FRValueParsers.ignoringReceiver()): FRAbstractParserObject<Point>(onReceive) {
+    onReceive: (FRParserContextType, Point) -> Unit = FRValueParsers.ignoringReceiverWithContext())
+    : FRAbstractParserObject<Point>(onReceive) {
     private var x: BigInteger? = null
     private var y: BigInteger? = null
     private var z: BigInteger? = null
@@ -302,9 +302,9 @@ abstract class FRParserContract {
 
     override fun forField(context: FRParserContextType, name: String): FRValueParserType<*>? {
       return when (name) {
-        "x" -> FRValueParsers.forInteger { _, value -> this.x = value }
-        "y" -> FRValueParsers.forInteger { _, value -> this.y = value }
-        "z" -> FRValueParsers.forInteger { _, value -> this.z = value }
+        "x" -> FRValueParsers.forInteger { value -> this.x = value }
+        "y" -> FRValueParsers.forInteger { value -> this.y = value }
+        "z" -> FRValueParsers.forInteger { value -> this.z = value }
         else -> null
       }
     }
@@ -415,7 +415,7 @@ abstract class FRParserContract {
   }
 
   class ArrayPointParser(
-    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiver()):
+    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiverWithContext()) :
     FRAbstractParserArray<Point>(onReceive) {
     private val points = mutableListOf<Point>()
 
@@ -531,8 +531,8 @@ abstract class FRParserContract {
   }
 
   class ArraySkippingPointParser(
-    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiver(),
-    val skip: Set<Int>):
+    onReceive: (FRParserContextType, List<Point>) -> Unit = FRValueParsers.ignoringReceiverWithContext(),
+    val skip: Set<Int>) :
     FRAbstractParserArray<Point>(onReceive) {
     private val points = mutableListOf<Point>()
 

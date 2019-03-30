@@ -15,57 +15,57 @@ import java.net.URI
 
 object FRValueParsers : FRValueParserProviderType {
 
-  override fun <T> forObject(
+  override fun <T> forObjectWithContext(
     forField: (FRParserContextType, String) -> FRValueParserType<*>,
     onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> {
     return FRParserObject(receiver, onFieldsCompleted, forField)
   }
 
-  override fun <T> forArrayMonomorphic(
+  override fun <T> forArrayMonomorphicWithContext(
     forEach: (FRParserContextType) -> FRValueParserType<T>,
     receiver: (FRParserContextType, List<T>) -> Unit): FRValueParserType<List<T>> {
     return FRParserArrayMonomorphic(receiver, forEach)
   }
 
-  override fun <T> forArray(
+  override fun <T> forArrayWithContext(
     forIndex: (FRParserContextType, Int) -> FRValueParserType<*>,
     onIndicesCompleted: (FRParserContextType) -> FRParseResult<List<T>>,
     receiver: (FRParserContextType, List<T>) -> Unit): FRValueParserType<List<T>> {
     return FRParserArray(receiver, onIndicesCompleted, forIndex)
   }
 
-  override fun forInteger(
+  override fun forIntegerWithContext(
     receiver: (FRParserContextType, BigInteger) -> Unit): FRValueParserType<BigInteger> {
     return FRValueParserInteger(receiver)
   }
 
-  override fun forReal(
+  override fun forRealWithContext(
     receiver: (FRParserContextType, Double) -> Unit): FRValueParserType<Double> {
     return FRValueParserReal(receiver)
   }
 
-  override fun forString(
+  override fun forStringWithContext(
     receiver: (FRParserContextType, String) -> Unit): FRValueParserType<String> {
     return FRValueParserString(receiver)
   }
 
-  override fun forMIME(
+  override fun forMIMEWithContext(
     receiver: (FRParserContextType, MIMEType) -> Unit): FRValueParserType<MIMEType> {
     return FRValueParserMIME(onReceive = receiver, parsers = { text -> MIMEParser.create(text) })
   }
 
-  override fun forBoolean(
+  override fun forBooleanWithContext(
     receiver: (FRParserContextType, Boolean) -> Unit): FRValueParserType<Boolean> {
     return FRValueParserBoolean(receiver)
   }
 
-  override fun forURI(
+  override fun forURIWithContext(
     receiver: (FRParserContextType, URI) -> Unit): FRValueParserType<URI> {
     return FRValueParserURI(receiver)
   }
 
-  override fun <T> forScalar(
+  override fun <T> forScalarWithContext(
     validator: (FRParserContextType, String) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> {
     return FRValueParserValid(receiver, validator)

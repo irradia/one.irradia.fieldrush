@@ -21,7 +21,7 @@ class FRParserArrayMonomorphic<T>(
   }
 
   override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*>? {
-    return object: FRValueParserType<T> {
+    return object : FRValueParserType<T> {
       override fun parse(context: FRParserContextType): FRParseResult<T> {
         return forEach.invoke(context).parse(context).map { x -> values.add(x); x }
       }
