@@ -28,15 +28,7 @@ sealed class FRParseResult<T> {
      * The list of parse errors.
      */
 
-    val errors: List<FRParseError>) : FRParseResult<T>() {
-
-    /**
-     * Cast this failure value to a different type.
-     */
-
-    fun <U> cast(): FRParseFailed<U> =
-      FRParseFailed(this.errors)
-  }
+    val errors: List<FRParseError>) : FRParseResult<T>()
 
   companion object {
 
@@ -73,6 +65,18 @@ sealed class FRParseResult<T> {
     fun <A> succeed(x: A): FRParseResult<A> {
       return FRParseSucceeded(x)
     }
+
+    /**
+     * If `errors` is empty, then evaluate `orElse`. Otherwise, return a failure result with
+     * `errors`.
+     */
+
+    fun <A> errorsOr(errors: List<FRParseError>, orElse: () -> FRParseResult<A>): FRParseResult<A> =
+      if (errors.isEmpty()) {
+        orElse.invoke()
+      } else {
+        FRParseFailed(errors)
+      }
   }
 
   /**
@@ -92,4 +96,17 @@ sealed class FRParseResult<T> {
 
   fun <U> flatMap(f: (T) -> FRParseResult<U>): FRParseResult<U> =
     flatMap(this, f)
+
+  /**
+   * If this value is successful, evaluate `f` and return `this`.
+   */
+
+  fun onSuccess(f: (T) -> Unit): FRParseResult<T> {
+    return when (this) {
+      is FRParseSucceeded -> {
+        f.invoke(this.result); this
+      }
+      is FRParseFailed -> this
+    }
+  }
 }

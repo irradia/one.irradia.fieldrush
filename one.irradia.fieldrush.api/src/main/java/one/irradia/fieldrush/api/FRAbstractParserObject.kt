@@ -2,7 +2,6 @@ package one.irradia.fieldrush.api
 
 import com.fasterxml.jackson.core.JsonToken.END_OBJECT
 import com.fasterxml.jackson.core.JsonToken.FIELD_NAME
-import com.google.common.base.Preconditions
 import one.irradia.fieldrush.api.FRParseResult.FRParseFailed
 import one.irradia.fieldrush.api.FRParseResult.FRParseSucceeded
 
@@ -110,13 +109,6 @@ abstract class FRAbstractParserObject<T>(
   private fun parseFinish(
     errors: MutableList<FRParseError>,
     context: FRParserContextType): FRParseResult<T> =
-    if (errors.isEmpty()) {
-      this.onCompleted(context)
-        .flatMap { result ->
-          this.onReceive.invoke(context, result)
-          FRParseSucceeded(result)
-        }
-    } else {
-      FRParseFailed(errors.toList())
-    }
+    FRParseResult.errorsOr(errors.toList()) { this.onCompleted(context) }
+      .onSuccess { this.onReceive.invoke(context, it) }
 }
