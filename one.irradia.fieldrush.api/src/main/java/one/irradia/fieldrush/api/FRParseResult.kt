@@ -28,7 +28,15 @@ sealed class FRParseResult<T> {
      * The list of parse errors.
      */
 
-    val errors: List<FRParseError>) : FRParseResult<T>()
+    val errors: List<FRParseError>) : FRParseResult<T>() {
+
+    /**
+     * Cast this failure value to a different type.
+     */
+
+    fun <U> cast(): FRParseFailed<U> =
+      FRParseFailed(this.errors)
+  }
 
   companion object {
 

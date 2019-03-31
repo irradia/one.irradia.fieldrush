@@ -560,4 +560,169 @@ abstract class FRParserContract {
         Assert.assertEquals(BigInteger.valueOf(6), parsed[0].z)
       }
   }
+
+  @Test
+  fun testArrayOrSingleOK0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-ok-0.json"),
+      rootParser = this.valueParsers.forArrayOrSingle({ PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result[0]
+        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assert.assertEquals(BigInteger.valueOf(100), parsed.y)
+        Assert.assertEquals(BigInteger.valueOf(7), parsed.z)
+      }
+  }
+
+  @Test
+  fun testArrayOrSingleOK1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = this.valueParsers.forArrayOrSingle({ PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+
+        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+
+        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+      }
+  }
+
+  @Test
+  fun testArrayOrSingleBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-int-ok-0.json"),
+      rootParser = this.valueParsers.forArrayOrSingle({ PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(3, failed.errors.size)
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+      }
+  }
+
+  @Test
+  fun testFails() {
+    resource("sources.txt").bufferedReader().useLines { lines ->
+      for (name in lines) {
+        this.parsers.createParser(
+          uri = URI.create("urn:test"),
+          stream = resource(name),
+          rootParser = this.valueParsers.fails<Unit>())
+          .use { parser ->
+            val result = parser.parse()
+            this.dumpParseResult(result)
+
+            val failed = result as FRParseResult.FRParseFailed
+            Assert.assertEquals(1, failed.errors.size)
+          }
+      }
+    }
+  }
+
+  @Test
+  fun testIgnores() {
+    resource("sources.txt").bufferedReader().useLines { lines ->
+      for (name in lines) {
+        this.parsers.createParser(
+          uri = URI.create("urn:test"),
+          stream = resource(name),
+          rootParser = this.valueParsers.ignores())
+          .use { parser ->
+            val result = parser.parse()
+            this.dumpParseResult(result)
+
+            val success = result as FRParseResult.FRParseSucceeded
+            val parsed = success.result
+          }
+      }
+    }
+  }
+
+  @Test
+  fun testScalarObjectIntPointOK0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("integer-ok-0.json"),
+      rootParser = this.valueParsers.forScalarOrObjectWithContext(
+        forScalar = { this.valueParsers.forScalarWithContext(::scalarPoint) },
+        forObject = { PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assert.assertEquals(BigInteger.valueOf(23), parsed.y)
+        Assert.assertEquals(BigInteger.valueOf(23), parsed.z)
+      }
+  }
+
+  @Test
+  fun testScalarObjectIntPointOK1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-ok-0.json"),
+      rootParser = this.valueParsers.forScalarOrObjectWithContext(
+        forScalar = { this.valueParsers.forScalarWithContext(::scalarPoint) },
+        forObject = { PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assert.assertEquals(BigInteger.valueOf(100), parsed.y)
+        Assert.assertEquals(BigInteger.valueOf(7), parsed.z)
+      }
+  }
+
+  @Test
+  fun testScalarObjectArrayBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = this.valueParsers.forScalarOrObjectWithContext(
+        forScalar = { this.valueParsers.forScalarWithContext(::scalarPoint) },
+        forObject = { PointParser() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(1, failed.errors.size)
+      }
+  }
+
+  private fun scalarPoint(context: FRParserContextType, text: String): FRParseResult<Point> {
+    return try {
+      FRParseResult.succeed(Point(text.toBigInteger(), text.toBigInteger(), text.toBigInteger()))
+    } catch (e: Exception) {
+      context.failureOf(e.message ?: "Something failed", e)
+    }
+  }
 }

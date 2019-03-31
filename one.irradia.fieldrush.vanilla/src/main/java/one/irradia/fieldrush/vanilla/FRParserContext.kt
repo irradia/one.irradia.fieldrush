@@ -1,7 +1,6 @@
 package one.irradia.fieldrush.vanilla
 
-import com.fasterxml.jackson.core.JsonParser
-import one.irradia.fieldrush.api.FRLexicalPosition
+import one.irradia.fieldrush.api.FRJSONStreamType
 import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult.FRParseFailed
 import one.irradia.fieldrush.api.FRParserContextType
@@ -11,14 +10,14 @@ import java.net.URI
 internal class FRParserContext internal constructor(
   private val depth: Int,
   override val documentURI: URI,
-  override val jsonParser: JsonParser,
+  override val jsonStream: FRJSONStreamType,
   private val logger: Logger) : FRParserContextType {
 
   override fun withNextDepth(): FRParserContextType {
     return FRParserContext(
       depth = this.depth + 1,
       documentURI = this.documentURI,
-      jsonParser = this.jsonParser,
+      jsonStream = this.jsonStream,
       logger = this.logger)
   }
 
@@ -27,8 +26,8 @@ internal class FRParserContext internal constructor(
       .append(String.format("[%2d]", this.depth))
       .append(String.format("[%-16s]", caller.simpleName))
       .append(String.format(" %4d:%-4d: ",
-        this.jsonParser.currentLocation.lineNr,
-        this.jsonParser.currentLocation.columnNr))
+        this.jsonStream.currentPosition.line,
+        this.jsonStream.currentPosition.column))
       .append(message)
       .toString()
   }
@@ -48,10 +47,7 @@ internal class FRParserContext internal constructor(
   override fun errorOf(message: String, exception: Exception?): FRParseError {
     return FRParseError(
       producer = "core",
-      position = FRLexicalPosition(
-        source = this.documentURI,
-        line = this.jsonParser.currentLocation.lineNr,
-        column = this.jsonParser.currentLocation.columnNr),
+      position = this.jsonStream.currentPosition,
       message = message,
       exception = exception)
   }

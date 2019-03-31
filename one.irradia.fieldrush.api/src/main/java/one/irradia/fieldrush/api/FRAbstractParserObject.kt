@@ -1,6 +1,7 @@
 package one.irradia.fieldrush.api
 
-import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.core.JsonToken.END_OBJECT
+import com.fasterxml.jackson.core.JsonToken.FIELD_NAME
 import com.google.common.base.Preconditions
 import one.irradia.fieldrush.api.FRParseResult.FRParseFailed
 import one.irradia.fieldrush.api.FRParseResult.FRParseSucceeded
@@ -13,18 +14,21 @@ abstract class FRAbstractParserObject<T>(
   private val onReceive: (FRParserContextType, T) -> Unit) : FRParserObjectType<T> {
 
   override fun parse(context: FRParserContextType): FRParseResult<T> {
-    context.trace(this.javaClass, "start: ${context.jsonParser.currentToken}")
+    context.trace(this.javaClass, "start: ${context.jsonStream.currentToken}")
 
-    if (!context.jsonParser.isExpectedStartObjectToken) {
+    if (!context.jsonStream.isExpectedStartObjectToken) {
       val failure =
         context.failureOf<T>("""Expected: '{'
-          | Received: ${context.jsonParser.currentToken}""".trimMargin())
-      this.skip(context)
+          | Received: ${context.jsonStream.currentToken}""".trimMargin())
+
+      context.jsonStream.skip()
       return failure
     }
 
     val errors = mutableListOf<FRParseError>()
-    context.jsonParser.nextToken()
+    if (!this.moveToNextToken(context, errors)) {
+      return FRParseFailed(errors.toList())
+    }
 
     val schema = this.schema(context)
     val requiredFieldNames =
@@ -34,47 +38,73 @@ abstract class FRAbstractParserObject<T>(
         .toMutableSet()
 
     while (true) {
-      if (context.jsonParser.currentToken == JsonToken.END_OBJECT) {
+      context.trace(this.javaClass, "token: ${context.jsonStream.currentToken}")
+
+      if (context.jsonStream.currentToken == END_OBJECT) {
         break
       }
 
-      Preconditions.checkArgument(
-        context.jsonParser.currentToken == JsonToken.FIELD_NAME,
-        "Current token ${context.jsonParser.currentToken} must be ${JsonToken.FIELD_NAME}")
-
-      val fieldName = context.jsonParser.currentName
-      val fieldSchema = schema.fieldsByName[fieldName]
-      context.jsonParser.nextToken()
-
-      if (fieldSchema != null) {
-        val parser = fieldSchema.parser.invoke()
-        context.trace(this.javaClass, "created field parser ${parser.javaClass.simpleName} for $fieldName")
-        val result = parser.parse(context.withNextDepth())
-        when (result) {
-          is FRParseSucceeded -> Unit
-          is FRParseFailed -> errors.addAll(result.errors)
-        }
-
-        requiredFieldNames.remove(fieldName)
-        context.trace(this.javaClass, "completed field parser ${parser.javaClass.simpleName} for $fieldName")
-      } else {
-        context.trace(this.javaClass, "no field parser for field $fieldName")
-        this.skip(context)
+      if (context.jsonStream.currentToken != FIELD_NAME) {
+        errors.add(expectedFieldName(context))
+        break
       }
+
+      val fieldName = context.jsonStream.currentName
+      val fieldSchema = schema.fieldsByName[fieldName]
+
+      if (!this.moveToNextToken(context, errors)) {
+        break
+      }
+
+      val parser : FRValueParserType<out Any?>
+      if (fieldSchema != null) {
+        parser = fieldSchema.parser.invoke()
+        context.trace(this.javaClass, "created field parser ${parser.javaClass.simpleName} for $fieldName")
+      } else {
+        context.trace(this.javaClass, "no field schema for field $fieldName")
+        parser = schema.unknownField.invoke(context, fieldName)
+      }
+
+      val result = parser.parse(context.withNextDepth())
+      when (result) {
+        is FRParseSucceeded -> Unit
+        is FRParseFailed -> errors.addAll(result.errors)
+      }
+
+      requiredFieldNames.remove(fieldName)
+      context.trace(this.javaClass, "completed field parser ${parser.javaClass.simpleName} for $fieldName")
     }
 
-    Preconditions.checkArgument(
-      context.jsonParser.currentToken == JsonToken.END_OBJECT,
-      "Current token ${context.jsonParser.currentToken} must be ${JsonToken.END_OBJECT}")
+    context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
+    this.moveToNextToken(context, errors)
+    this.checkRequiredFields(requiredFieldNames, errors, context)
+    return parseFinish(errors, context)
+  }
 
-    context.trace(this.javaClass, "end: ${context.jsonParser.currentToken}")
-    context.jsonParser.nextToken()
-
+  private fun checkRequiredFields(
+    requiredFieldNames: MutableSet<String>,
+    errors: MutableList<FRParseError>,
+    context: FRParserContextType) {
     for (name in requiredFieldNames) {
       errors.add(context.errorOf("Missing a required field '${name}'"))
     }
+  }
 
-    return parseFinish(errors, context)
+  private fun moveToNextToken(
+    context: FRParserContextType,
+    errors: MutableList<FRParseError>): Boolean {
+    val nextToken = context.jsonStream.nextToken()
+    if (nextToken is FRParseFailed) {
+      errors.addAll(nextToken.errors)
+      return false
+    }
+    return true
+  }
+
+  private fun expectedFieldName(context: FRParserContextType): FRParseError {
+    return context.errorOf("""Expected: A field name
+            | Received: ${context.jsonStream.currentToken}
+          """.trimMargin())
   }
 
   private fun parseFinish(
@@ -89,16 +119,4 @@ abstract class FRAbstractParserObject<T>(
     } else {
       FRParseFailed(errors.toList())
     }
-
-  private fun skip(context: FRParserContextType) {
-    val before = context.jsonParser.currentToken
-    context.trace(this.javaClass, "skip: before ${before}")
-
-    if (before.isStructStart) {
-      context.jsonParser.skipChildren()
-    }
-
-    context.jsonParser.nextToken()
-    context.trace(this.javaClass, "skip: after ${context.jsonParser.currentToken}")
-  }
 }

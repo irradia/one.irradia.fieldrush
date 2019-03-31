@@ -2,6 +2,8 @@ package one.irradia.fieldrush.vanilla
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser
+import one.irradia.fieldrush.api.FRLexicalPosition
+import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRParserType
@@ -53,12 +55,32 @@ class FRParsers : FRParserProviderType {
         throw IllegalStateException("Parser is closed")
       }
 
-      this.jsonParser.nextToken()
-      return this.rootParser.parse(FRParserContext(
-        depth = 0,
-        documentURI = this.documentURI,
-        jsonParser = this.jsonParser,
-        logger = this.logger))
+      val jsonStream : FRJSONStream
+      try {
+        jsonStream = FRJSONStream(this.documentURI, this.jsonParser)
+      } catch (e: Exception) {
+        return FRParseResult.FRParseFailed(
+          errors = listOf(FRParseError(
+            producer = "core",
+            position = FRLexicalPosition(this.documentURI, 1, 0),
+            message = e.message ?: "JSON stream failed",
+            exception = e)))
+      }
+
+      val context =
+        FRParserContext(
+          depth = 0,
+          documentURI = this.documentURI,
+          jsonStream = jsonStream,
+          logger = this.logger)
+
+      return this.rootParser.parse(context).flatMap { data ->
+        if (jsonStream.currentToken != null) {
+          context.failureOf("Failed to consume all JSON input")
+        } else {
+          FRParseResult.succeed(data)
+        }
+      }
     }
   }
 }
