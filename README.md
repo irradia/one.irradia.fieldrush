@@ -20,6 +20,7 @@ one.irradia.fieldrush
 * Full positional/lexical information to pinpoint errors in data
 * ISC license
 * High coverage automated test suite
+* Fuzz-tested for robustness
 
 ## Building
 
