@@ -55,7 +55,7 @@ class FRParsers : FRParserProviderType {
         throw IllegalStateException("Parser is closed")
       }
 
-      val jsonStream : FRJSONStream
+      val jsonStream: FRJSONStream
       try {
         jsonStream = FRJSONStream(this.documentURI, this.jsonParser)
       } catch (e: Exception) {

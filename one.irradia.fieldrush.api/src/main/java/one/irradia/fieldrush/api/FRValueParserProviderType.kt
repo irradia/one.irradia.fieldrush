@@ -259,6 +259,28 @@ interface FRValueParserProviderType {
     this.forArrayOrSingleWithContext(forItem = { forItem() })
 
   /**
+   * Return a parser that consumes an object and produces a map.
+   */
+
+  fun <T> forObjectMapWithContext(
+    forKey: (FRParserContextType, String) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, Map<String, T>) -> Unit = ignoringReceiverWithContext())
+    : FRParserObjectMapType<T>
+
+  /**
+   * Return a parser that consumes an object and produces a map.
+   */
+
+  fun <T> forObjectMap(
+    forKey: (String) -> FRValueParserType<T>,
+    receiver: (Map<String, T>) -> Unit = ignoringReceiver())
+    : FRParserObjectMapType<T> {
+    return this.forObjectMapWithContext(
+      forKey = { _, key -> forKey.invoke(key) },
+      receiver = { _, m -> receiver.invoke(m) })
+  }
+
+  /**
    * Return a parser that always fails.
    */
 

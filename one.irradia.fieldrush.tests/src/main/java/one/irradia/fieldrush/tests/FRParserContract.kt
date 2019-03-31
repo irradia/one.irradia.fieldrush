@@ -325,7 +325,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-ok-1.json"),
-      rootParser = PointParser { _, _ -> })
+      rootParser = PointParser())
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -343,7 +343,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-0.json"),
-      rootParser = PointParser { _, _ -> })
+      rootParser = PointParser())
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -361,7 +361,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-1.json"),
-      rootParser = PointParser { _, _ -> })
+      rootParser = PointParser())
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -379,7 +379,7 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("object-point-bad-2.json"),
-      rootParser = PointParser { _, _ -> })
+      rootParser = PointParser())
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
@@ -724,5 +724,68 @@ abstract class FRParserContract {
     } catch (e: Exception) {
       context.failureOf(e.message ?: "Something failed", e)
     }
+  }
+
+  @Test
+  fun testObjectMapOK0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-ok-0.json"),
+      rootParser = this.valueParsers.forObjectMap({ this.valueParsers.forInteger() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val success = result as FRParseResult.FRParseSucceeded
+        val parsed = success.result
+        Assert.assertEquals(BigInteger.valueOf(23), parsed["x"])
+        Assert.assertEquals(BigInteger.valueOf(100), parsed["y"])
+        Assert.assertEquals(BigInteger.valueOf(7), parsed["z"])
+      }
+  }
+
+  @Test
+  fun testObjectMapBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("array-point-ok-0.json"),
+      rootParser = this.valueParsers.forObjectMap({ this.valueParsers.forInteger() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(1, failed.errors.size)
+      }
+  }
+
+  @Test
+  fun testObjectMapBad1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-bad-3.json"),
+      rootParser = this.valueParsers.forObjectMap({ this.valueParsers.forInteger() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(3, failed.errors.size)
+      }
+  }
+
+  @Test
+  fun testObjectMapBad2() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-bad-4.json"),
+      rootParser = this.valueParsers.forObjectMap({ this.valueParsers.forInteger() }))
+      .use { parser ->
+        val result = parser.parse()
+        this.dumpParseResult(result)
+
+        val failed = result as FRParseResult.FRParseFailed
+        Assert.assertEquals(1, failed.errors.size)
+      }
   }
 }
