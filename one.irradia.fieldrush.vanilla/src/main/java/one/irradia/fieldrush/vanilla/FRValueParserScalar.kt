@@ -20,19 +20,24 @@ abstract class FRValueParserScalar<T>(
     text: String): FRParseResult<T>
 
   final override fun parse(context: FRParserContextType): FRParseResult<T> {
-    val token = context.jsonParser.currentToken
-    return if (token.isScalarValue) {
-      val text = context.jsonParser.text
-      context.jsonParser.nextToken()
-      this.ofText(context, text)
-        .map { x -> this.onReceive.invoke(context, x);x }
-    } else {
-      if (token.isStructStart) {
-        context.jsonParser.skipChildren()
+    val token = context.jsonStream.currentToken
+
+    return when {
+      token == null ->
+        context.failureOf("""Expected: A scalar value
+          | Received: ${token}""".trimMargin())
+
+      token.isScalarValue -> {
+        val text = context.jsonStream.currentText
+        context.jsonStream.skip()
+        this.ofText(context, text).map { x -> this.onReceive.invoke(context, x);x }
       }
-      context.jsonParser.nextToken()
-      context.failureOf("""Expected: A scalar value
-        | Received: ${token}""".trimMargin())
+
+      else -> {
+        context.jsonStream.skip()
+        context.failureOf("""Expected: A scalar value
+          | Received: ${token}""".trimMargin())
+      }
     }
   }
 }

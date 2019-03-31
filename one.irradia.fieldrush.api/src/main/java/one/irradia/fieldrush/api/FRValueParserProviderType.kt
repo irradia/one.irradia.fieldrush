@@ -22,9 +22,8 @@ interface FRValueParserProviderType {
    */
 
   fun forInteger(receiver: (BigInteger) -> Unit = ignoringReceiver())
-    : FRValueParserType<BigInteger> {
-    return this.forIntegerWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<BigInteger> =
+    this.forIntegerWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a floating-point value.
@@ -38,9 +37,8 @@ interface FRValueParserProviderType {
    */
 
   fun forReal(receiver: (Double) -> Unit = ignoringReceiver())
-    : FRValueParserType<Double> {
-    return this.forRealWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<Double> =
+    this.forRealWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a string value.
@@ -54,9 +52,8 @@ interface FRValueParserProviderType {
    */
 
   fun forString(receiver: (String) -> Unit = ignoringReceiver())
-    : FRValueParserType<String> {
-    return this.forStringWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<String> =
+    this.forStringWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a MIME type value.
@@ -70,9 +67,8 @@ interface FRValueParserProviderType {
    */
 
   fun forMIME(receiver: (MIMEType) -> Unit = ignoringReceiver())
-    : FRValueParserType<MIMEType> {
-    return this.forMIMEWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<MIMEType> =
+    this.forMIMEWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a boolean value.
@@ -86,9 +82,8 @@ interface FRValueParserProviderType {
    */
 
   fun forBoolean(receiver: (Boolean) -> Unit = ignoringReceiver())
-    : FRValueParserType<Boolean> {
-    return this.forBooleanWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<Boolean> =
+    this.forBooleanWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a URI value.
@@ -102,9 +97,8 @@ interface FRValueParserProviderType {
    */
 
   fun forURI(receiver: (URI) -> Unit = ignoringReceiver())
-    : FRValueParserType<URI> {
-    return this.forURIWithContext { _, value -> receiver.invoke(value) }
-  }
+    : FRValueParserType<URI> =
+    this.forURIWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a scalar value.
@@ -122,11 +116,10 @@ interface FRValueParserProviderType {
   fun <T> forScalar(
     validator: (String) -> FRParseResult<T>,
     receiver: (T) -> Unit = ignoringReceiver())
-    : FRValueParserType<T> {
-    return this.forScalarWithContext(
+    : FRValueParserType<T> =
+    this.forScalarWithContext(
       validator = { _, value -> validator.invoke(value) },
       receiver = { _, value -> receiver.invoke(value) })
-  }
 
   /**
    * Return a parser that consumes an object value.
@@ -146,15 +139,14 @@ interface FRValueParserProviderType {
     onSchema: (FRParserContextType) -> FRParserObjectSchema,
     onCompleted: () -> FRParseResult<T>,
     receiver: (T) -> Unit = ignoringReceiver())
-    : FRValueParserType<T> {
-    return this.forObjectWithContext(
+    : FRValueParserType<T> =
+    this.forObjectWithContext(
       onSchema = { context -> onSchema.invoke(context) },
       onCompleted = { onCompleted.invoke() },
       receiver = { _, value -> receiver.invoke(value) })
-  }
 
   /**
-   * Return a parser that consumes an array value.
+   * Return a parser that consumes an array.
    */
 
   fun <T> forArrayWithContext(
@@ -164,22 +156,21 @@ interface FRValueParserProviderType {
     : FRValueParserType<List<T>>
 
   /**
-   * Return a parser that consumes an array value.
+   * Return a parser that consumes an array.
    */
 
   fun <T> forArray(
     forIndex: (Int) -> FRValueParserType<*>,
     onIndicesCompleted: () -> FRParseResult<List<T>>,
     receiver: (List<T>) -> Unit = ignoringReceiver())
-    : FRValueParserType<List<T>> {
-    return this.forArrayWithContext(
+    : FRValueParserType<List<T>> =
+    this.forArrayWithContext(
       forIndex = { _, index -> forIndex.invoke(index) },
       onIndicesCompleted = { onIndicesCompleted.invoke() },
       receiver = { _, value -> receiver.invoke(value) })
-  }
 
   /**
-   * Return a parser that consumes an array value.
+   * Return a parser that consumes an array of objects of the same type.
    */
 
   fun <T> forArrayMonomorphicWithContext(
@@ -188,17 +179,98 @@ interface FRValueParserProviderType {
     : FRValueParserType<List<T>>
 
   /**
-   * Return a parser that consumes an array value.
+   * Return a parser that consumes an array of objects of the same type.
    */
 
   fun <T> forArrayMonomorphic(
     forEach: () -> FRValueParserType<T>,
     receiver: (List<T>) -> Unit = ignoringReceiver())
-    : FRValueParserType<List<T>> {
-    return this.forArrayMonomorphicWithContext(
+    : FRValueParserType<List<T>> =
+    this.forArrayMonomorphicWithContext(
       forEach = { forEach.invoke() },
       receiver = { _, value -> receiver.invoke(value) })
-  }
+
+  /**
+   * Return a parser that can parse a scalar, array, or object.
+   */
+
+  fun <T> forScalarArrayOrObjectWithContext(
+    forScalar: (FRParserContextType) -> FRValueParserType<T>,
+    forArray: (FRParserContextType) -> FRValueParserType<List<T>>,
+    forObject: (FRParserContextType) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, List<T>) -> Unit = ignoringReceiverWithContext())
+    : FRParserScalarArrayOrObjectType<T>
+
+  /**
+   * Return a parser that can parse a scalar, array, or object.
+   */
+
+  fun <T> forScalarArrayOrObject(
+    forScalar: () -> FRValueParserType<T>,
+    forArray: () -> FRValueParserType<List<T>>,
+    forObject: () -> FRValueParserType<T>,
+    receiver: (List<T>) -> Unit = ignoringReceiver())
+    : FRParserScalarArrayOrObjectType<T> =
+    this.forScalarArrayOrObjectWithContext(
+      forScalar = { forScalar() },
+      forArray = { forArray() },
+      forObject = { forObject() })
+
+  /**
+   * Return a parser that can parse a scalar, or object.
+   */
+
+  fun <T> forScalarOrObjectWithContext(
+    forScalar: (FRParserContextType) -> FRValueParserType<T>,
+    forObject: (FRParserContextType) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, T) -> Unit = ignoringReceiverWithContext())
+    : FRParserScalarOrObjectType<T>
+
+  /**
+   * Return a parser that can parse a scalar, or object.
+   */
+
+  fun <T> forScalarOrObject(
+    forScalar: () -> FRValueParserType<T>,
+    forObject: () -> FRValueParserType<T>,
+    receiver: (T) -> Unit = ignoringReceiver())
+    : FRParserScalarOrObjectType<T> =
+    this.forScalarOrObjectWithContext(
+      forScalar = { forScalar() },
+      forObject = { forObject() })
+
+  /**
+   * Return a parser that can parse an array, or an object.
+   */
+
+  fun <T> forArrayOrSingleWithContext(
+    forItem: (FRParserContextType) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, List<T>) -> Unit = ignoringReceiverWithContext())
+    : FRParserArrayOrSingleType<T>
+
+  /**
+   * Return a parser that can parse a scalar, or object.
+   */
+
+  fun <T> forArrayOrSingle(
+    forItem: () -> FRValueParserType<T>,
+    receiver: (T) -> Unit = ignoringReceiver())
+    : FRParserArrayOrSingleType<T> =
+    this.forArrayOrSingleWithContext(forItem = { forItem() })
+
+  /**
+   * Return a parser that always fails.
+   */
+
+  fun <T> fails(): FRValueParserType<T> =
+    FRParserFails()
+
+  /**
+   * Return a parser that ignores all input.
+   */
+
+  fun ignores(): FRValueParserType<Unit> =
+    FRParserIgnores()
 
   /**
    * A parser receiver that ignores the given results.

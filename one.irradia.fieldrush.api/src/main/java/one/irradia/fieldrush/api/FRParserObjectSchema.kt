@@ -10,7 +10,13 @@ data class FRParserObjectSchema(
    * Schemas for the fields in the object.
    */
 
-  val fields: List<FRParserObjectFieldSchema<*>>) {
+  val fields: List<FRParserObjectFieldSchema<*>>,
+
+  /**
+   * Create a parser for unknown fields.
+   */
+
+  val unknownField: (FRParserContextType, String) -> FRValueParserType<*> = { _, _ -> FRParserIgnores() }) {
 
   /**
    * The field schemas organized by name.

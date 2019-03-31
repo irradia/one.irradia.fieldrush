@@ -13,21 +13,29 @@ abstract class FRAbstractParserArray<T>(
   private val onReceive: (FRParserContextType, List<T>) -> Unit) : FRParserArrayType<List<T>> {
 
   override fun parse(context: FRParserContextType): FRParseResult<List<T>> {
-    context.trace(this.javaClass, "start: ${context.jsonParser.currentToken}")
+    context.trace(this.javaClass, "start: ${context.jsonStream.currentToken}")
 
-    if (!context.jsonParser.isExpectedStartArrayToken) {
+    if (!context.jsonStream.isExpectedStartArrayToken) {
       val failure =
         context.failureOf<List<T>>("""Expected: '['
-          | Received: ${context.jsonParser.currentToken}""".trimMargin())
-      this.skip(context)
+          | Received: ${context.jsonStream.currentToken}""".trimMargin())
+
+      context.jsonStream.skip()
       return failure
     }
 
-    context.jsonParser.nextToken()
     val errors = mutableListOf<FRParseError>()
+    if (!this.moveToNextToken(context, errors)) {
+      return FRParseFailed(errors.toList())
+    }
+
     var index = 0
     while (true) {
-      if (context.jsonParser.currentToken == JsonToken.END_ARRAY) {
+      if (context.jsonStream.currentToken == null) {
+        return context.failureOf("Unexpected end-of-stream")
+      }
+
+      if (context.jsonStream.currentToken == JsonToken.END_ARRAY) {
         break
       }
 
@@ -43,19 +51,47 @@ abstract class FRAbstractParserArray<T>(
         context.trace(this.javaClass, "${index}: completed index parser ${parser.javaClass.simpleName}")
       } else {
         context.trace(this.javaClass, "${index}: no index parser")
-        this.skip(context)
+        skipContent(context, errors)
       }
 
       index += 1
     }
 
     Preconditions.checkArgument(
-      context.jsonParser.currentToken == JsonToken.END_ARRAY,
-      "Current token ${context.jsonParser.currentToken} must be ${JsonToken.END_ARRAY}")
+      context.jsonStream.currentToken == JsonToken.END_ARRAY,
+      "Current token ${context.jsonStream.currentToken} must be ${JsonToken.END_ARRAY}")
 
-    context.trace(this.javaClass, "end: ${context.jsonParser.currentToken}")
-    context.jsonParser.nextToken()
+    context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
 
+    skipContent(context, errors)
+    return completeResult(errors, context)
+  }
+
+  private fun skipContent(
+    context: FRParserContextType,
+    errors: MutableList<FRParseError>): Boolean {
+    val skip = context.jsonStream.skip()
+    if (skip is FRParseFailed) {
+      errors.addAll(skip.errors)
+      return false
+    }
+    return true
+  }
+
+  private fun moveToNextToken(
+    context: FRParserContextType,
+    errors: MutableList<FRParseError>): Boolean {
+    val nextToken = context.jsonStream.nextToken()
+    if (nextToken is FRParseFailed) {
+      errors.addAll(nextToken.errors)
+      return false
+    }
+    return true
+  }
+
+  private fun completeResult(
+    errors: MutableList<FRParseError>,
+    context: FRParserContextType): FRParseResult<List<T>> {
     return if (errors.isEmpty()) {
       this.onCompleted(context)
         .flatMap { items ->
@@ -65,17 +101,5 @@ abstract class FRAbstractParserArray<T>(
     } else {
       FRParseFailed(errors.toList())
     }
-  }
-
-  private fun skip(context: FRParserContextType) {
-    val before = context.jsonParser.currentToken
-    context.trace(this.javaClass, "skip: before ${before}")
-
-    if (before.isStructStart) {
-      context.jsonParser.skipChildren()
-    }
-
-    context.jsonParser.nextToken()
-    context.trace(this.javaClass, "skip: after ${context.jsonParser.currentToken}")
   }
 }

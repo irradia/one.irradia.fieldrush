@@ -16,10 +16,10 @@ interface FRParserContextType {
   val documentURI: URI
 
   /**
-   * An open JSON stream parser.
+   * An open JSON stream.
    */
 
-  val jsonParser: JsonParser
+  val jsonStream: FRJSONStreamType
 
   /**
    * Return a new context value with a depth one greater than that of the current context.
