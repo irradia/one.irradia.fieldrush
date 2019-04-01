@@ -3,6 +3,7 @@ package one.irradia.fieldrush.vanilla
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserArrayOrSingleType
 import one.irradia.fieldrush.api.FRParserContextType
+import one.irradia.fieldrush.api.FRParserObjectMapType
 import one.irradia.fieldrush.api.FRParserObjectSchema
 import one.irradia.fieldrush.api.FRParserScalarArrayOrObjectType
 import one.irradia.fieldrush.api.FRParserScalarOrObjectType
@@ -10,6 +11,7 @@ import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
+import org.joda.time.Instant
 import java.math.BigInteger
 import java.net.URI
 
@@ -18,6 +20,15 @@ import java.net.URI
  */
 
 object FRValueParsers : FRValueParserProviderType {
+
+  override fun forTimestampWithContext(
+    receiver: (FRParserContextType, Instant) -> Unit): FRValueParserType<Instant> =
+    FRValueParserTimestamp(receiver)
+
+  override fun <T> forObjectMapWithContext(
+    forKey: (FRParserContextType, String) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, Map<String, T>) -> Unit): FRParserObjectMapType<T> =
+    FRParserObjectMap(forKey, receiver)
 
   override fun <T> forArrayOrSingleWithContext(
     forItem: (FRParserContextType) -> FRValueParserType<T>,

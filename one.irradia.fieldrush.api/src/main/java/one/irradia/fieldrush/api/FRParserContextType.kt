@@ -1,6 +1,5 @@
 package one.irradia.fieldrush.api
 
-import com.fasterxml.jackson.core.JsonParser
 import java.net.URI
 
 /**

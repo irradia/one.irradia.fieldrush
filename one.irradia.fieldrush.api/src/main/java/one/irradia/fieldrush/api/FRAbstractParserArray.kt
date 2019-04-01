@@ -51,7 +51,7 @@ abstract class FRAbstractParserArray<T>(
         context.trace(this.javaClass, "${index}: completed index parser ${parser.javaClass.simpleName}")
       } else {
         context.trace(this.javaClass, "${index}: no index parser")
-        skipContent(context, errors)
+        this.skipContent(context, errors)
       }
 
       index += 1
@@ -63,8 +63,8 @@ abstract class FRAbstractParserArray<T>(
 
     context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
 
-    skipContent(context, errors)
-    return completeResult(errors, context)
+    this.skipContent(context, errors)
+    return this.completeResult(errors, context)
   }
 
   private fun skipContent(
@@ -91,15 +91,7 @@ abstract class FRAbstractParserArray<T>(
 
   private fun completeResult(
     errors: MutableList<FRParseError>,
-    context: FRParserContextType): FRParseResult<List<T>> {
-    return if (errors.isEmpty()) {
-      this.onCompleted(context)
-        .flatMap { items ->
-          this.onReceive.invoke(context, items)
-          FRParseResult.succeed(items)
-        }
-    } else {
-      FRParseFailed(errors.toList())
-    }
-  }
+    context: FRParserContextType): FRParseResult<List<T>> =
+    FRParseResult.errorsOr(errors.toList()) { this.onCompleted(context) }
+      .onSuccess { this.onReceive.invoke(context, it) }
 }

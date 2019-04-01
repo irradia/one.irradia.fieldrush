@@ -1,6 +1,7 @@
 package one.irradia.fieldrush.api
 
 import one.irradia.mime.api.MIMEType
+import org.joda.time.Instant
 import java.math.BigInteger
 import java.net.URI
 
@@ -99,6 +100,21 @@ interface FRValueParserProviderType {
   fun forURI(receiver: (URI) -> Unit = ignoringReceiver())
     : FRValueParserType<URI> =
     this.forURIWithContext { _, value -> receiver.invoke(value) }
+
+  /**
+   * Return a parser that consumes a timestamp value.
+   */
+
+  fun forTimestampWithContext(receiver: (FRParserContextType, Instant) -> Unit = ignoringReceiverWithContext())
+    : FRValueParserType<Instant>
+
+  /**
+   * Return a parser that consumes a timestamp value.
+   */
+
+  fun forTimestamp(receiver: (Instant) -> Unit = ignoringReceiver())
+    : FRValueParserType<Instant> =
+    this.forTimestampWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a scalar value.
@@ -257,6 +273,37 @@ interface FRValueParserProviderType {
     receiver: (T) -> Unit = ignoringReceiver())
     : FRParserArrayOrSingleType<T> =
     this.forArrayOrSingleWithContext(forItem = { forItem() })
+
+  /**
+   * Return a parser that consumes an object and produces a map.
+   */
+
+  fun <T> forObjectMapWithContext(
+    forKey: (FRParserContextType, String) -> FRValueParserType<T>,
+    receiver: (FRParserContextType, Map<String, T>) -> Unit = ignoringReceiverWithContext())
+    : FRParserObjectMapType<T>
+
+  /**
+   * Return a parser that consumes an object and produces a map.
+   */
+
+  fun <T> forObjectMap(
+    forKey: (String) -> FRValueParserType<T>,
+    receiver: (Map<String, T>) -> Unit = ignoringReceiver())
+    : FRParserObjectMapType<T> {
+    return this.forObjectMapWithContext(
+      forKey = { _, key -> forKey.invoke(key) },
+      receiver = { _, m -> receiver.invoke(m) })
+  }
+
+  /**
+   * Return a parser derived from the given function.
+   */
+
+  fun <T> forFunction(f: (FRParserContextType) -> FRParseResult<T>): FRValueParserType<T> =
+    object : FRValueParserType<T> {
+      override fun parse(context: FRParserContextType): FRParseResult<T> = f.invoke(context)
+    }
 
   /**
    * Return a parser that always fails.

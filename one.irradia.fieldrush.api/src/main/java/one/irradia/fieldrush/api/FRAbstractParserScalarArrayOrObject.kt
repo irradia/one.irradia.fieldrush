@@ -56,6 +56,6 @@ abstract class FRAbstractParserScalarArrayOrObject<T>(
         """.trimMargin())
       }
 
-    return result.map { x -> this.onReceive.invoke(context, x); x }
+    return result.onSuccess { x -> this.onReceive.invoke(context, x) }
   }
 }

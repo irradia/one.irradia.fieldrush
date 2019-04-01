@@ -13,5 +13,4 @@ interface FRParserType<T> : Closeable {
    */
 
   fun parse(): FRParseResult<T>
-
 }
