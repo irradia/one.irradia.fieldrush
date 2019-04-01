@@ -12,6 +12,7 @@ import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.fieldrush.vanilla.FRValueParsers
 import one.irradia.mime.vanilla.MIMEParser
 import org.hamcrest.core.StringContains
+import org.joda.time.Instant
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -817,5 +818,62 @@ abstract class FRParserContract {
         val failed = result as FRParseResult.FRParseFailed
         Assert.assertEquals(1, failed.errors.size)
       }
+  }
+
+  @Test
+  fun testTimestampOK0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("timestamp-ok-0.json"),
+      rootParser = FRValueParsers.forTimestamp()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assert.assertEquals(Instant.parse("2010-01-01T00:00:10"), parsed)
+    }
+  }
+
+  @Test
+  fun testTimestampBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("mime-ok-0.json"),
+      rootParser = FRValueParsers.forTimestamp()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val failed = result as FRParseResult.FRParseFailed
+      Assert.assertEquals(1, failed.errors.size)
+    }
+  }
+
+  @Test
+  fun testTimestampBad1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("string-ok-0.json"),
+      rootParser = FRValueParsers.forTimestamp()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val failed = result as FRParseResult.FRParseFailed
+      Assert.assertEquals(1, failed.errors.size)
+    }
+  }
+
+  @Test
+  fun testTimestampBad2() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("object-point-ok-0.json"),
+      rootParser = FRValueParsers.forTimestamp()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val failed = result as FRParseResult.FRParseFailed
+      Assert.assertEquals(1, failed.errors.size)
+    }
   }
 }

@@ -1,6 +1,7 @@
 package one.irradia.fieldrush.api
 
 import one.irradia.mime.api.MIMEType
+import org.joda.time.Instant
 import java.math.BigInteger
 import java.net.URI
 
@@ -99,6 +100,21 @@ interface FRValueParserProviderType {
   fun forURI(receiver: (URI) -> Unit = ignoringReceiver())
     : FRValueParserType<URI> =
     this.forURIWithContext { _, value -> receiver.invoke(value) }
+
+  /**
+   * Return a parser that consumes a timestamp value.
+   */
+
+  fun forTimestampWithContext(receiver: (FRParserContextType, Instant) -> Unit = ignoringReceiverWithContext())
+    : FRValueParserType<Instant>
+
+  /**
+   * Return a parser that consumes a timestamp value.
+   */
+
+  fun forTimestamp(receiver: (Instant) -> Unit = ignoringReceiver())
+    : FRValueParserType<Instant> =
+    this.forTimestampWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a scalar value.
