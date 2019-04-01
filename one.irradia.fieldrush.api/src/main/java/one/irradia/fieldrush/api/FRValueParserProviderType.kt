@@ -281,6 +281,15 @@ interface FRValueParserProviderType {
   }
 
   /**
+   * Return a parser derived from the given function.
+   */
+
+  fun <T> forFunction(f: (FRParserContextType) -> FRParseResult<T>): FRValueParserType<T> =
+    object : FRValueParserType<T> {
+      override fun parse(context: FRParserContextType): FRParseResult<T> = f.invoke(context)
+    }
+
+  /**
    * Return a parser that always fails.
    */
 

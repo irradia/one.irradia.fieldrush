@@ -105,6 +105,36 @@ abstract class FRParserContract {
   }
 
   @Test
+  fun testIntegerOKFlatMap0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("integer-ok-0.json"),
+      rootParser = FRValueParsers.forInteger()).use { parser ->
+      val result = parser.parse().flatMap { x -> FRParseResult.succeed(x.toString()) }
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assert.assertEquals("23", parsed)
+    }
+  }
+
+  @Test
+  fun testIntegerOKMap0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("integer-ok-0.json"),
+      rootParser = FRValueParsers.forInteger()).use { parser ->
+      val result = parser.parse().map(BigInteger::toString)
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assert.assertEquals("23", parsed)
+    }
+  }
+
+  @Test
   fun testIntegerBad0() {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
