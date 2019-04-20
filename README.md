@@ -24,10 +24,11 @@ one.irradia.fieldrush
 
 ## Building
 
-Install the Android SDK.
+Install the Android SDK. The package has no dependencies on the Android API
+and is therefore usable in non-Android projects.
 
 ```
-$ ./gradlew clean assembleDebug test
+$ ./gradlew clean assemble test
 ```
 
 If the above fails, it's a bug. Report it!
@@ -79,7 +80,7 @@ the freedom to use other implementations of the API if desired.
 Releases are published to Maven Central with the following invocation:
 
 ```
-$ ./gradlew clean assembleDebug publish closeAndReleaseRepository
+$ ./gradlew clean assemble publish closeAndReleaseRepository
 ```
 
 Consult the documentation for the [Gradle Signing plugin](https://docs.gradle.org/current/userguide/signing_plugin.html)

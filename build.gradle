@@ -15,7 +15,11 @@
  */
 
 buildscript {
-  ext.kotlin_version = "1.3.21"
+  if ("$gradle.gradleVersion" != "5.2.1") {
+    throw new GradleException("Gradle version 5.2.1 is required (received $gradle.gradleVersion)")
+  }
+
+  ext.kotlin_version = "1.3.30"
 
   repositories {
     mavenCentral()
@@ -24,12 +28,19 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:3.3.2"
+    classpath "com.android.tools.build:gradle:3.4.0"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     classpath "digital.wup:android-maven-publish:3.6.2"
     classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
     classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.13.0"
   }
+}
+
+plugins {
+  id "ru.vyarus.animalsniffer"             version "1.5.0"
+  id "io.codearte.nexus-staging"           version "0.20.0"
+  id "com.vanniktech.android.junit.jacoco" version "0.13.0"
+  id "digital.wup.android-maven-publish"   version "3.6.2"
 }
 
 ext {
@@ -64,49 +75,85 @@ allprojects {
 
 subprojects { project ->
 
-  apply plugin: "com.android.library"
-  apply plugin: "kotlin-android"
-  apply plugin: "digital.wup.android-maven-publish"
-  apply plugin: "signing"
+  switch (POM_PACKAGING) {
+    case "jar":
+      logger.info("Configuring ${project} (${POM_PACKAGING}) as jar project")
 
-  android {
-    compileSdkVersion androidCompileSDKVersion
-    buildToolsVersion androidBuildToolsVersion
+      apply plugin: "java"
+      apply plugin: "java-library"
+      apply plugin: "kotlin"
 
-    defaultConfig {
-      minSdkVersion androidMinimumSDKVersion
-      targetSdkVersion androidTargetSDKVersion
-      testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
+      /*
+       * Apply the Animal Sniffer plugin to check that code is Android compatible.
+       */
 
-    testOptions {
-      execution "ANDROID_TEST_ORCHESTRATOR"
-      animationsDisabled = true
-    }
+      apply plugin: "ru.vyarus.animalsniffer"
+
+      dependencies {
+        signature "org.codehaus.mojo.signature:java16:1.1@signature"
+        signature "net.sf.androidscents.signature:android-api-level-14:4.0_r4@signature"
+      }
+      break
+
+    case "aar":
+      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library project")
+
+      apply plugin: "com.android.library"
+      apply plugin: "kotlin-android"
+
+      android {
+        compileSdkVersion androidCompileSDKVersion
+        buildToolsVersion androidBuildToolsVersion
+
+        defaultConfig {
+          minSdkVersion androidMinimumSDKVersion
+          targetSdkVersion androidTargetSDKVersion
+          testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        }
+
+        testOptions {
+          execution "ANDROID_TEST_ORCHESTRATOR"
+          animationsDisabled = true
+        }
+      }
+      break
+
+    default:
+      throw new IllegalStateException(
+        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
   }
 
-  repositories {
-    mavenLocal()
-    mavenCentral()
-  }
-
-  task androidJavadocsJar(type: Jar) {
+  task javadocsJar(type: Jar) {
     classifier = "javadoc"
   }
 
-  task androidSourcesJar(type: Jar) {
+  task sourcesJar(type: Jar) {
     classifier = "sources"
     from "src/main/java", "src/main/resources"
   }
 
+  apply plugin: "digital.wup.android-maven-publish"
+  apply plugin: "signing"
+
   publishing {
     publications {
-      basicAAR(MavenPublication) {
-        from components.android
+      basicJar(MavenPublication) {
+
+        switch (POM_PACKAGING) {
+          case "jar":
+            from components.java
+            break
+
+          case "aar":
+            from components.android
+            break
+        }
+
+        artifact sourcesJar
+        artifact javadocsJar
 
         pom {
           artifactId  = POM_ARTIFACT_ID
-
           name        = POM_NAME
           packaging   = POM_PACKAGING
           description = POM_DESCRIPTION
@@ -151,14 +198,9 @@ subprojects { project ->
     }
   }
 
-  artifacts {
-    archives androidSourcesJar
-    archives androidJavadocsJar
-  }
-
   signing {
     useGpgCmd()
-    sign publishing.publications.basicAAR
+    sign publishing.publications.basicJar
   }
 
   repositories {
@@ -184,18 +226,19 @@ subprojects { project ->
   }
 
   dependencies {
-    dependencyKotlinReflect            "org.jetbrains.kotlin:kotlin-reflect:1.3.21"
+    dependencyKotlinReflect            "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     dependencyKotlinStdlib             "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     dependencyJUnit                    "junit:junit:4.12"
     dependencyAndroidSupportTestRules  "com.android.support.test:rules:1.0.2"
     dependencyAndroidSupportTestRunner "com.android.support.test:runner:1.0.2"
     dependencyAndroidTestOrchestrator  "com.android.support.test:orchestrator:1.0.2"
     dependencyJodaTime                 "joda-time:joda-time:2.10.1"
-    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:0.0.4"
-    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:0.0.4"
+    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:0.0.5"
+    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:0.0.5"
     dependencyGoogleGuava              "com.google.guava:guava:27.1-android"
     dependencySLF4J                    "org.slf4j:slf4j-api:1.8.0-beta4"
     dependencyLogback                  "ch.qos.logback:logback-classic:1.3.0-alpha4"
     dependencyJackson                  "com.fasterxml.jackson.core:jackson-core:2.9.8"
   }
 }
+
