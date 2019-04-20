@@ -33,6 +33,7 @@ buildscript {
     classpath "digital.wup:android-maven-publish:3.6.2"
     classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
     classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.13.0"
+    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:4.2.0"
   }
 }
 
@@ -93,6 +94,20 @@ subprojects { project ->
         signature "org.codehaus.mojo.signature:java16:1.1@signature"
         signature "net.sf.androidscents.signature:android-api-level-14:4.0_r4@signature"
       }
+
+      /*
+       * Build an OSGi bundle.
+       */
+
+      apply plugin: "biz.aQute.bnd.builder"
+
+      jar {
+        bnd """
+Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
+
+-removeheaders: Bnd-LastModified, Tool, Private-Package
+"""
+      }
       break
 
     case "aar":
@@ -110,7 +125,10 @@ subprojects { project ->
           targetSdkVersion androidTargetSDKVersion
           testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         }
-
+        compileOptions {
+          sourceCompatibility JavaVersion.VERSION_1_8
+          targetCompatibility JavaVersion.VERSION_1_8
+        }
         testOptions {
           execution "ANDROID_TEST_ORCHESTRATOR"
           animationsDisabled = true
@@ -210,6 +228,7 @@ subprojects { project ->
   }
 
   configurations {
+    dependencyOSGiBundleAnnotation
     dependencyKotlinReflect
     dependencyKotlinStdlib
     dependencyJUnit
@@ -226,6 +245,7 @@ subprojects { project ->
   }
 
   dependencies {
+    dependencyOSGiBundleAnnotation     "org.osgi:org.osgi.annotation.bundle:1.0.0"
     dependencyKotlinReflect            "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     dependencyKotlinStdlib             "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     dependencyJUnit                    "junit:junit:4.12"
@@ -233,8 +253,8 @@ subprojects { project ->
     dependencyAndroidSupportTestRunner "com.android.support.test:runner:1.0.2"
     dependencyAndroidTestOrchestrator  "com.android.support.test:orchestrator:1.0.2"
     dependencyJodaTime                 "joda-time:joda-time:2.10.1"
-    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:0.0.5"
-    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:0.0.5"
+    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:0.0.6"
+    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:0.0.6"
     dependencyGoogleGuava              "com.google.guava:guava:27.1-android"
     dependencySLF4J                    "org.slf4j:slf4j-api:1.8.0-beta4"
     dependencyLogback                  "ch.qos.logback:logback-classic:1.3.0-alpha4"

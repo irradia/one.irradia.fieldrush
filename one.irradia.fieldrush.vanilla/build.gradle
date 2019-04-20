@@ -20,6 +20,8 @@ configurations {
   api.extendsFrom dependencyIrradiaMimeAPI
   api.extendsFrom dependencyIrradiaMimeImpl
   api.extendsFrom dependencyGoogleGuava
+
+  compileOnly.extendsFrom dependencyOSGiBundleAnnotation
 }
 
 dependencies {
