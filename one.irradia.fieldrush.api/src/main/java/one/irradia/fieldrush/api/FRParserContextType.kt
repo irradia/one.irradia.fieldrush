@@ -21,6 +21,12 @@ interface FRParserContextType {
   val jsonStream: FRJSONStreamType
 
   /**
+   * The provider that can be used to create new sub-parsers.
+   */
+
+  val parsers: FRParserProviderType
+
+  /**
    * Return a new context value with a depth one greater than that of the current context.
    */
 

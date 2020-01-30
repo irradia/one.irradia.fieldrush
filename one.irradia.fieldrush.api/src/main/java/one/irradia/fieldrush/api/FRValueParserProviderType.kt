@@ -327,6 +327,15 @@ interface FRValueParserProviderType {
     }
 
   /**
+   * Given a parser that does not accept `null` values, return a version of the given
+   * parser that does.
+   */
+
+  fun <T> acceptingNull(
+    parser: FRValueParserType<T>
+  ): FRValueParserType<T?>
+
+  /**
    * Return a parser that always fails.
    */
 
