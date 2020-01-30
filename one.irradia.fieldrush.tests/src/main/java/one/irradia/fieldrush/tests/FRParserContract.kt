@@ -876,4 +876,34 @@ abstract class FRParserContract {
       Assert.assertEquals(1, failed.errors.size)
     }
   }
+
+  @Test
+  fun testScalarNullAccepted0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("string-ok-0.json"),
+      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s)})).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assert.assertEquals("xyz", parsed)
+    }
+  }
+
+  @Test
+  fun testScalarNullAccepted1() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("null.json"),
+      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s)})).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assert.assertEquals(null, parsed)
+    }
+  }
 }

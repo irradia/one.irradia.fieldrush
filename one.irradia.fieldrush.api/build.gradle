@@ -21,6 +21,8 @@ configurations {
   api.extendsFrom dependencyIrradiaMimeAPI
   api.extendsFrom dependencyJackson
   api.extendsFrom dependencyGoogleGuava
+
+  compileOnly.extendsFrom dependencyOSGiBundleAnnotation
 }
 
 dependencies {

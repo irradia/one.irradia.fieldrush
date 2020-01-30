@@ -138,6 +138,27 @@ interface FRValueParserProviderType {
       receiver = { _, value -> receiver.invoke(value) })
 
   /**
+   * Return a parser that consumes a scalar or null value.
+   */
+
+  fun <T> forScalarOrNullWithContext(
+    validator: (FRParserContextType, String) -> FRParseResult<T>,
+    receiver: (FRParserContextType, T?) -> Unit = ignoringReceiverWithContext())
+    : FRValueParserType<T?>
+
+  /**
+   * Return a parser that consumes a scalar or null value.
+   */
+
+  fun <T> forScalarOrNull(
+    validator: (String) -> FRParseResult<T>,
+    receiver: (T?) -> Unit = ignoringReceiver())
+    : FRValueParserType<T?> =
+    this.forScalarOrNullWithContext(
+      validator = { _, value -> validator.invoke(value) },
+      receiver = { _, value -> receiver.invoke(value) })
+
+  /**
    * Return a parser that consumes an object value.
    */
 
