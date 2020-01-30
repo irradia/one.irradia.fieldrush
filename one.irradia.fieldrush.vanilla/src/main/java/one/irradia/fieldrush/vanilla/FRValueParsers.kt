@@ -30,6 +30,9 @@ object FRValueParsers : FRValueParserProviderType {
     receiver: (FRParserContextType, Map<String, T>) -> Unit): FRParserObjectMapType<T> =
     FRParserObjectMap(forKey, receiver)
 
+  override fun <T> acceptingNull(parser: FRValueParserType<T>): FRValueParserType<T?> =
+    FRValueParserOrNull(parser)
+
   override fun <T> forArrayOrSingleWithContext(
     forItem: (FRParserContextType) -> FRValueParserType<T>,
     receiver: (FRParserContextType, List<T>) -> Unit): FRParserArrayOrSingleType<T> =
@@ -79,7 +82,10 @@ object FRValueParsers : FRValueParserProviderType {
 
   override fun forMIMEWithContext(
     receiver: (FRParserContextType, MIMEType) -> Unit): FRValueParserType<MIMEType> =
-    FRValueParserMIME(onReceive = receiver, parsers = { text -> MIMEParser.create(text) })
+    FRValueParserMIME(
+      onReceive = receiver,
+      parsers = { text -> MIMEParser.create(text) }
+    )
 
   override fun forBooleanWithContext(
     receiver: (FRParserContextType, Boolean) -> Unit): FRValueParserType<Boolean> =
@@ -98,6 +104,6 @@ object FRValueParsers : FRValueParserProviderType {
     validator: (FRParserContextType, String) -> FRParseResult<T>,
     receiver: (FRParserContextType, T?) -> Unit
   ): FRValueParserType<T?> =
-    FRValueParserValidOrNull(receiver, validator)
+    this.acceptingNull(this.forScalarWithContext(validator, receiver))
 }
 
