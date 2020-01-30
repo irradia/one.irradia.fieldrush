@@ -16,7 +16,8 @@ sealed class FRParseResult<T> {
      * The parsed value.
      */
 
-    val result: T) : FRParseResult<T>()
+    val result: T
+  ) : FRParseResult<T>()
 
   /**
    * Parsing failed.
@@ -28,7 +29,8 @@ sealed class FRParseResult<T> {
      * The list of parse errors.
      */
 
-    val errors: List<FRParseError>) : FRParseResult<T>()
+    val errors: List<FRParseError>
+  ) : FRParseResult<T>()
 
   companion object {
 

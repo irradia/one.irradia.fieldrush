@@ -93,5 +93,11 @@ object FRValueParsers : FRValueParserProviderType {
     validator: (FRParserContextType, String) -> FRParseResult<T>,
     receiver: (FRParserContextType, T) -> Unit): FRValueParserType<T> =
     FRValueParserValid(receiver, validator)
+
+  override fun <T> forScalarOrNullWithContext(
+    validator: (FRParserContextType, String) -> FRParseResult<T>,
+    receiver: (FRParserContextType, T?) -> Unit
+  ): FRValueParserType<T?> =
+    FRValueParserValidOrNull(receiver, validator)
 }
 

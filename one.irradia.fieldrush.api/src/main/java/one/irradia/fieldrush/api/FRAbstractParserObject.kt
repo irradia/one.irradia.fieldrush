@@ -10,7 +10,8 @@ import one.irradia.fieldrush.api.FRParseResult.FRParseSucceeded
  */
 
 abstract class FRAbstractParserObject<T>(
-  private val onReceive: (FRParserContextType, T) -> Unit) : FRParserObjectType<T> {
+  private val onReceive: (FRParserContextType, T) -> Unit
+) : FRParserObjectType<T> {
 
   override fun parse(context: FRParserContextType): FRParseResult<T> {
     context.trace(this.javaClass, "start: ${context.jsonStream.currentToken}")
