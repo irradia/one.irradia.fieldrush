@@ -28,7 +28,14 @@ class FRParsers : FRParserProviderType {
     uri: URI,
     stream: InputStream,
     rootParser: FRValueParserType<T>): FRParserType<T> {
-    return Parser(uri, stream, rootParser, this.parsers.createParser(stream), this.logger)
+    return Parser(
+      documentURI = uri,
+      jsonParser = this.parsers.createParser(stream),
+      logger = this.logger,
+      parsers = this,
+      rootParser = rootParser,
+      stream = stream
+    )
   }
 
   private class Parser<T>(
@@ -36,7 +43,9 @@ class FRParsers : FRParserProviderType {
     private val stream: InputStream,
     private val rootParser: FRValueParserType<T>,
     private val jsonParser: JsonParser,
-    private val logger: Logger) : FRParserType<T> {
+    private val logger: Logger,
+    private val parsers: FRParserProviderType
+  ) : FRParserType<T> {
 
     private var closed = false
 
@@ -72,7 +81,9 @@ class FRParsers : FRParserProviderType {
           depth = 0,
           documentURI = this.documentURI,
           jsonStream = jsonStream,
-          logger = this.logger)
+          logger = this.logger,
+          parsers = this.parsers
+        )
 
       return this.rootParser.parse(context).flatMap { data ->
         if (jsonStream.currentToken != null) {

@@ -4,6 +4,7 @@ import one.irradia.fieldrush.api.FRJSONStreamType
 import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult.FRParseFailed
 import one.irradia.fieldrush.api.FRParserContextType
+import one.irradia.fieldrush.api.FRParserProviderType
 import org.slf4j.Logger
 import java.net.URI
 
@@ -11,6 +12,7 @@ internal class FRParserContext internal constructor(
   private val depth: Int,
   override val documentURI: URI,
   override val jsonStream: FRJSONStreamType,
+  override val parsers: FRParserProviderType,
   private val logger: Logger) : FRParserContextType {
 
   override fun withNextDepth(): FRParserContextType {
@@ -18,7 +20,9 @@ internal class FRParserContext internal constructor(
       depth = this.depth + 1,
       documentURI = this.documentURI,
       jsonStream = this.jsonStream,
-      logger = this.logger)
+      logger = this.logger,
+      parsers = this.parsers
+    )
   }
 
   private fun makeMessage(caller: Class<*>, message: String): String {
