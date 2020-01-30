@@ -7,6 +7,7 @@ import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult
 import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRParserType
+import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +33,7 @@ class FRParsers : FRParserProviderType {
       documentURI = uri,
       jsonParser = this.parsers.createParser(stream),
       logger = this.logger,
-      parsers = this,
+      parsers = FRValueParsers,
       rootParser = rootParser,
       stream = stream
     )
@@ -44,7 +45,7 @@ class FRParsers : FRParserProviderType {
     private val rootParser: FRValueParserType<T>,
     private val jsonParser: JsonParser,
     private val logger: Logger,
-    private val parsers: FRParserProviderType
+    private val parsers: FRValueParserProviderType
   ) : FRParserType<T> {
 
     private var closed = false

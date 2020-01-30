@@ -5,6 +5,7 @@ import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult.FRParseFailed
 import one.irradia.fieldrush.api.FRParserContextType
 import one.irradia.fieldrush.api.FRParserProviderType
+import one.irradia.fieldrush.api.FRValueParserProviderType
 import org.slf4j.Logger
 import java.net.URI
 
@@ -12,7 +13,7 @@ internal class FRParserContext internal constructor(
   private val depth: Int,
   override val documentURI: URI,
   override val jsonStream: FRJSONStreamType,
-  override val parsers: FRParserProviderType,
+  override val parsers: FRValueParserProviderType,
   private val logger: Logger) : FRParserContextType {
 
   override fun withNextDepth(): FRParserContextType {

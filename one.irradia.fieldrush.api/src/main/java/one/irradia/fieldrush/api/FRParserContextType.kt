@@ -24,7 +24,7 @@ interface FRParserContextType {
    * The provider that can be used to create new sub-parsers.
    */
 
-  val parsers: FRParserProviderType
+  val parsers: FRValueParserProviderType
 
   /**
    * Return a new context value with a depth one greater than that of the current context.
