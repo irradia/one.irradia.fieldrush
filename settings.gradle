@@ -1,4 +1,3 @@
 include ':one.irradia.fieldrush.api'
 include ':one.irradia.fieldrush.vanilla'
 include ':one.irradia.fieldrush.tests'
-include ':one.irradia.fieldrush.tests.device'
