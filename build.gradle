@@ -28,11 +28,12 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:4.0.1"
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath "digital.wup:android-maven-publish:3.6.3"
-    classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.16.0"
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2"
+    classpath "com.android.tools.build:gradle:4.0.1"
+    classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.16.0"
+    classpath "de.undercouch:gradle-download-task:4.0.4"
+    classpath "digital.wup:android-maven-publish:3.6.3"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
@@ -69,6 +70,7 @@ ext {
 }
 
 apply plugin: "com.vanniktech.android.junit.jacoco"
+apply plugin: "de.undercouch.download"
 
 allprojects {
   group   = project.ext["GROUP"]
@@ -76,6 +78,30 @@ allprojects {
 }
 
 subprojects { project ->
+
+  def scandoVersion = "0.0.5"
+  def scandoSHA256 = "d1e6e57a791363d2a6e9930a15b779fb45855006f5ee7e0119286652ccad7827"
+  def scandoSource = "https://repo1.maven.org/maven2/com/io7m/scando/com.io7m.scando.cmdline/${scandoVersion}/com.io7m.scando.cmdline-${scandoVersion}-main.jar"
+  def scandoBinDir = "${project.buildDir}/bin/"
+  def scandoTarget = "${scandoBinDir}/scando.jar"
+
+  afterEvaluate {
+    task scandoMakeDirectories() {
+      mkdir "${scandoBinDir}"
+    }
+
+    task scandoDownload(type: Download, dependsOn: scandoMakeDirectories) {
+      src scandoSource
+      dest scandoTarget
+      overwrite true
+    }
+
+    task scandoDownloadVerify(type: Verify, dependsOn: scandoDownload) {
+      src scandoTarget
+      checksum scandoSHA256
+      algorithm 'SHA-256'
+    }
+  }
 
   switch (POM_PACKAGING) {
     case "jar":
@@ -140,6 +166,85 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     default:
       throw new IllegalStateException(
         "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
+  }
+
+  /*
+   * Add semantic versioning tasks.
+   */
+
+  switch (POM_PACKAGING) {
+    case "jar":
+      afterEvaluate {
+        task scandoAnalyze(type: Exec, dependsOn: [scandoDownloadVerify, assemble]) {
+          def oldGroup = "${project.group}".replace('.', '/')
+          def oldPath = "${oldGroup}/${POM_ARTIFACT_ID}/${VERSION_NAME_PREVIOUS}/${POM_ARTIFACT_ID}-${VERSION_NAME_PREVIOUS}.${POM_PACKAGING}"
+          def oldUrl = "https://repo1.maven.org/maven2/${oldPath}"
+
+          commandLine = [
+            "java",
+            "-jar",
+            scandoTarget,
+            "--excludeList",
+            "${project.rootDir}/VERSIONING.txt",
+            "--oldJarUri",
+            "${oldUrl}",
+            "--oldJarVersion",
+            "${VERSION_NAME_PREVIOUS}",
+            "--ignoreMissingOld",
+            "--newJar",
+            "${buildDir}/libs/${POM_ARTIFACT_ID}-${VERSION_NAME}.${POM_PACKAGING}",
+            "--newJarVersion",
+            "${VERSION_NAME}",
+            "--textReport",
+            "${project.buildDir}/scando-report.txt",
+            "--htmlReport",
+            "${project.buildDir}/scando-report.html"
+          ]
+        }
+
+        task verifySemanticVersioning(dependsOn: [scandoAnalyze]) {
+
+        }
+      }
+      break
+
+    case "aar":
+      afterEvaluate {
+        task scandoAnalyze(type: Exec, dependsOn: [scandoDownloadVerify, assemble]) {
+          def oldGroup = "${project.group}".replace('.', '/')
+          def oldPath = "${oldGroup}/${POM_ARTIFACT_ID}/${VERSION_NAME_PREVIOUS}/${POM_ARTIFACT_ID}-${VERSION_NAME_PREVIOUS}.${POM_PACKAGING}"
+          def oldUrl = "https://repo1.maven.org/maven2/${oldPath}"
+
+          commandLine = [
+            "java",
+            "-jar",
+            scandoTarget,
+            "--excludeList",
+            "${project.rootDir}/VERSIONING.txt",
+            "--oldJarUri",
+            "${oldUrl}",
+            "--oldJarVersion",
+            "${VERSION_NAME_PREVIOUS}",
+            "--ignoreMissingOld",
+            "--newJar",
+            "${buildDir}/outputs/${POM_PACKAGING}/${POM_ARTIFACT_ID}.${POM_PACKAGING}",
+            "--newJarVersion",
+            "${VERSION_NAME}",
+            "--textReport",
+            "${project.buildDir}/scando-report.txt",
+            "--htmlReport",
+            "${project.buildDir}/scando-report.html"
+          ]
+        }
+
+        task verifySemanticVersioning(dependsOn: [scandoAnalyze]) {
+
+        }
+      }
+      break
+
+    default:
+      break
   }
 
   task javadocsJar(type: Jar) {
