@@ -15,11 +15,11 @@
  */
 
 buildscript {
-  if ("$gradle.gradleVersion" != "5.2.1") {
-    throw new GradleException("Gradle version 5.2.1 is required (received $gradle.gradleVersion)")
+  if ("$gradle.gradleVersion" != "6.3") {
+    throw new GradleException("Gradle version 6.3 is required (received $gradle.gradleVersion)")
   }
 
-  ext.kotlin_version = "1.3.30"
+  ext.kotlin_version = "1.3.72"
 
   repositories {
     mavenCentral()
@@ -28,46 +28,47 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:3.4.0"
+    classpath "com.android.tools.build:gradle:4.0.1"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath "digital.wup:android-maven-publish:3.6.2"
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
-    classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.13.0"
-    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:4.2.0"
+    classpath "digital.wup:android-maven-publish:3.6.3"
+    classpath "com.vanniktech:gradle-android-junit-jacoco-plugin:0.16.0"
+    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.1.2"
   }
 }
 
 plugins {
   id "ru.vyarus.animalsniffer"             version "1.5.0"
-  id "io.codearte.nexus-staging"           version "0.20.0"
   id "com.vanniktech.android.junit.jacoco" version "0.13.0"
   id "digital.wup.android-maven-publish"   version "3.6.2"
 }
 
 ext {
-  androidBuildToolsVersion = "28.0.3"
+  androidBuildToolsVersion = "29.0.2"
   androidCompileSDKVersion = 28
   androidMinimumSDKVersion = 21
-  androidTargetSDKVersion  = 28
+  androidTargetSDKVersion = 28
 
-  if (!project.hasProperty("nexusUsername")) {
-    logger.warn("No nexusUsername property specified: Using an empty value")
-    nexusUsername = ""
+  if (!project.hasProperty("mavenCentralUsername")) {
+    logger.warn("No mavenCentralUsername property specified: Using an empty value")
+    mavenCentralUsername = ""
   }
-  if (!project.hasProperty("nexusPassword")) {
-    logger.warn("No nexusPassword property specified: Using an empty value")
-    nexusPassword = ""
+  if (!project.hasProperty("mavenCentralPassword")) {
+    logger.warn("No mavenCentralPassword property specified: Using an empty value")
+    mavenCentralPassword = ""
+  }
+
+  if (project.hasProperty("one.irradia.directory.publish")) {
+    useDirectoryPublishPath = project.property("one.irradia.directory.publish")
+    useDirectoryPublish = true
+    logger.warn("one.irradia.directory.publish is set: We will publish artifacts to ${useDirectoryPublishPath}")
+  } else {
+    logger.warn("one.irradia.directory.publish is not set: We will not publish artifacts to a custom directory")
+    useDirectoryPublish = false
+    useDirectoryPublishPath = null
   }
 }
 
-apply plugin: "io.codearte.nexus-staging"
 apply plugin: "com.vanniktech.android.junit.jacoco"
-
-nexusStaging {
-  packageGroup                = "one.irradia"
-  numberOfRetries             = 32
-  delayBetweenRetriesInMillis = 2000
-}
 
 allprojects {
   group   = project.ext["GROUP"]
@@ -203,14 +204,22 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     }
 
     repositories {
+      if (useDirectoryPublish) {
+        logger.info("using ${useDirectoryPublishPath} for publication")
+
+        maven {
+          name = "Directory"
+          url = "file://${useDirectoryPublishPath}"
+        }
+      }
+
       maven {
         def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
         def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
         url = version.endsWith("SNAPSHOT") ? snapshotsRepoUrl : releasesRepoUrl
-
         credentials(PasswordCredentials) {
-          username nexusUsername
-          password nexusPassword
+          username mavenCentralUsername
+          password mavenCentralPassword
         }
       }
     }
@@ -252,13 +261,13 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
     dependencyAndroidSupportTestRules  "com.android.support.test:rules:1.0.2"
     dependencyAndroidSupportTestRunner "com.android.support.test:runner:1.0.2"
     dependencyAndroidTestOrchestrator  "com.android.support.test:orchestrator:1.0.2"
-    dependencyJodaTime                 "joda-time:joda-time:2.10.1"
-    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:0.0.6"
-    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:0.0.6"
+    dependencyJodaTime                 "joda-time:joda-time:2.10.6"
+    dependencyIrradiaMimeAPI           "one.irradia.mime:one.irradia.mime.api:1.1.1"
+    dependencyIrradiaMimeImpl          "one.irradia.mime:one.irradia.mime.vanilla:1.1.1"
     dependencyGoogleGuava              "com.google.guava:guava:27.1-android"
     dependencySLF4J                    "org.slf4j:slf4j-api:1.8.0-beta4"
     dependencyLogback                  "ch.qos.logback:logback-classic:1.3.0-alpha4"
-    dependencyJackson                  "com.fasterxml.jackson.core:jackson-core:2.9.8"
+    dependencyJackson                  "com.fasterxml.jackson.core:jackson-core:2.10.2"
   }
 }
 
