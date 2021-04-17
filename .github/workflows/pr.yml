@@ -18,9 +18,5 @@ jobs:
           java-version: 11
       - name: Build PR
         run: .ci/ci-main.sh pull-request
-      - name: Upload test report
-        uses: actions/upload-artifact@v2
-        if: ${{ always() }}
-        with:
-          name: junit-test-report
-          path: ./one.irradia.fieldrush.tests/build/reports/tests/testDebugUnitTest/
+      - name: Code Coverage
+        uses: codecov/codecov-action@v1

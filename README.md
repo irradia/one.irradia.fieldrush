@@ -28,7 +28,7 @@ Install the Android SDK. The package has no dependencies on the Android API
 and is therefore usable in non-Android projects.
 
 ```
-$ ./gradlew clean assemble test
+$ ./gradlew clean assemble check
 ```
 
 If the above fails, it's a bug. Report it!
