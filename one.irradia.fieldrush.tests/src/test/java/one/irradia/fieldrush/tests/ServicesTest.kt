@@ -1,6 +1,5 @@
-package one.irradia.fieldrush.tests.local
+package one.irradia.fieldrush.tests
 
-import one.irradia.fieldrush.tests.ServicesContract
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

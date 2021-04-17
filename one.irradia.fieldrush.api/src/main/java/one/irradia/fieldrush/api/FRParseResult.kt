@@ -13,6 +13,12 @@ sealed class FRParseResult<T> {
   data class FRParseSucceeded<T>(
 
     /**
+     * The list of parse warnings.
+     */
+
+    val warnings: List<FRParseWarning>,
+
+    /**
      * The parsed value.
      */
 
@@ -26,6 +32,12 @@ sealed class FRParseResult<T> {
   data class FRParseFailed<T>(
 
     /**
+     * The list of parse warnings.
+     */
+
+    val warnings: List<FRParseWarning>,
+
+    /**
      * The list of parse errors.
      */
 
@@ -36,27 +48,59 @@ sealed class FRParseResult<T> {
 
     /**
      * Functor map.
+     *
      * If r == FRParseSucceeded(x), return FRParseSucceeded(f(x))
      * If r == FRParseFailed(y), return FRParseFailed(y)
      */
 
-    fun <A, B> map(x: FRParseResult<A>, f: (A) -> B): FRParseResult<B> {
+    fun <A, B> map(
+      x: FRParseResult<A>,
+      f: (A) -> B
+    ): FRParseResult<B> {
       return when (x) {
-        is FRParseSucceeded -> FRParseSucceeded(f.invoke(x.result))
-        is FRParseFailed -> FRParseFailed(x.errors)
+        is FRParseSucceeded ->
+          FRParseSucceeded(
+            result = f.invoke(x.result),
+            warnings = x.warnings
+          )
+        is FRParseFailed ->
+          FRParseFailed(
+            warnings = x.warnings,
+            errors = x.errors
+          )
       }
     }
 
     /**
      * Monadic bind.
+     *
      * If r == FRParseSucceeded(x), return f(r)
      * If r == FRParseFailed(y), return FRParseFailed(y)
      */
 
-    fun <A, B> flatMap(x: FRParseResult<A>, f: (A) -> FRParseResult<B>): FRParseResult<B> {
+    fun <A, B> flatMap(
+      x: FRParseResult<A>,
+      f: (A) -> FRParseResult<B>
+    ): FRParseResult<B> {
       return when (x) {
-        is FRParseSucceeded -> f.invoke(x.result)
-        is FRParseFailed -> FRParseFailed(x.errors)
+        is FRParseSucceeded ->
+          when (val result = f.invoke(x.result)) {
+            is FRParseFailed ->
+              FRParseFailed(
+                warnings = result.warnings.plus(x.warnings),
+                errors = result.errors
+              )
+            is FRParseSucceeded ->
+              FRParseSucceeded(
+                warnings = result.warnings.plus(x.warnings),
+                result = result.result
+              )
+          }
+        is FRParseFailed ->
+          FRParseFailed(
+            warnings = x.warnings,
+            errors = x.errors
+          )
       }
     }
 
@@ -64,8 +108,21 @@ sealed class FRParseResult<T> {
      * Construct a successful parse result.
      */
 
-    fun <A> succeed(x: A): FRParseResult<A> {
-      return FRParseSucceeded(x)
+    fun <A> succeed(
+      warnings: List<FRParseWarning>,
+      x: A
+    ): FRParseResult<A> {
+      return FRParseSucceeded(warnings, x)
+    }
+
+    /**
+     * Construct a successful parse result.
+     */
+
+    fun <A> succeed(
+      x: A
+    ): FRParseResult<A> {
+      return FRParseSucceeded(listOf(), x)
     }
 
     /**
@@ -73,11 +130,15 @@ sealed class FRParseResult<T> {
      * `errors`.
      */
 
-    fun <A> errorsOr(errors: List<FRParseError>, orElse: () -> FRParseResult<A>): FRParseResult<A> =
+    fun <A> errorsOr(
+      warnings: List<FRParseWarning> = listOf(),
+      errors: List<FRParseError>,
+      orElse: () -> FRParseResult<A>
+    ): FRParseResult<A> =
       if (errors.isEmpty()) {
         orElse.invoke()
       } else {
-        FRParseFailed(errors)
+        FRParseFailed(warnings, errors)
       }
   }
 

@@ -17,9 +17,9 @@ class FRValueParserBoolean(
     val upper = text.toUpperCase()
     return when (upper) {
       "TRUE" ->
-        FRParseSucceeded(true)
+        FRParseSucceeded(warnings = listOf(), result = true)
       "FALSE" ->
-        FRParseSucceeded(false)
+        FRParseSucceeded(warnings = listOf(), result = false)
       else ->
         context.failureOf("""Expected: A boolean
             | Received: ${text}""".trimMargin())

@@ -14,7 +14,7 @@ class FRValueParserString(
   override fun ofText(
     context: FRParserContextType,
     text: String): FRParseResult<String> {
-    return FRParseSucceeded(text)
+    return FRParseSucceeded(warnings = listOf(), result = text)
   }
 
 }

@@ -45,15 +45,20 @@ internal class FRJSONStream(
           source = this.documentURI,
           line = this.jsonParser.currentLocation.lineNr,
           column = this.jsonParser.currentLocation.columnNr)
-      return FRParseResult.succeed(this.currentTokenVar)
+      return FRParseResult.succeed(
+        warnings = listOf(),
+        x = this.currentTokenVar
+      )
     } catch (e: Exception) {
       FRParseFailed(
+        warnings = listOf(),
         errors = listOf(
           FRParseError(
             "core",
             this.currentPosition,
             message = e.message ?: "JSON parsing failed",
-            exception = e)))
+            exception = e)
+        ))
     }
   }
 
@@ -75,12 +80,14 @@ internal class FRJSONStream(
       this.nextToken().map { }
     } catch (e: Exception) {
       FRParseFailed(
+        warnings = listOf(),
         errors = listOf(
           FRParseError(
             "core",
             this.currentPosition,
             message = e.message ?: "JSON parsing failed",
-            exception = e)))
+            exception = e)
+        ))
     }
   }
 }

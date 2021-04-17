@@ -70,6 +70,7 @@ class FRParsers : FRParserProviderType {
         jsonStream = FRJSONStream(this.documentURI, this.jsonParser)
       } catch (e: Exception) {
         return FRParseResult.FRParseFailed(
+          warnings = listOf(),
           errors = listOf(FRParseError(
             producer = "core",
             position = FRLexicalPosition(this.documentURI, 1, 0),
@@ -90,7 +91,7 @@ class FRParsers : FRParserProviderType {
         if (jsonStream.currentToken != null) {
           context.failureOf("Failed to consume all JSON input")
         } else {
-          FRParseResult.succeed(data)
+          FRParseResult.succeed(warnings = listOf(), data)
         }
       }
     }

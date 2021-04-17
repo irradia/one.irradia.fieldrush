@@ -58,6 +58,9 @@ internal class FRParserContext internal constructor(
   }
 
   override fun <T> failureOf(message: String, exception: Exception?): FRParseFailed<T> {
-    return FRParseFailed(listOf(this.errorOf(message, exception)))
+    return FRParseFailed(
+      warnings = listOf(),
+      errors = listOf(this.errorOf(message, exception))
+    )
   }
 }

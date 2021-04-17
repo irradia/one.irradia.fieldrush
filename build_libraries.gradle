@@ -17,7 +17,7 @@
 ext.kotlin_version = "1.4.20"
 
 ext.versions = [
-
+  junit_jupiter: '5.7.1',
 ]
 
 ext.libraries = [
@@ -25,6 +25,8 @@ ext.libraries = [
   kotlin_reflect             : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
   kotlin_stdlib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
   junit                      : "junit:junit:4.12",
+  junit_jupiter_api          : "org.junit.jupiter:junit-jupiter-api:${versions.junit_jupiter}",
+  junit_jupiter_engine       : "org.junit.jupiter:junit-jupiter-engine:${versions.junit_jupiter}",
   android_support_test_rules : "com.android.support.test:rules:1.0.2",
   android_support_test_runner: "com.android.support.test:runner:1.0.2",
   android_test_orchestrator  : "com.android.support.test:orchestrator:1.0.2",

@@ -18,7 +18,10 @@ class FRValueParserTimestamp(
     context: FRParserContextType,
     text: String): FRParseResult<Instant> {
     return try {
-      FRParseSucceeded(Instant.parse(text, ISODateTimeFormat.dateTimeParser()))
+      FRParseSucceeded(
+        warnings = listOf(),
+        result = Instant.parse(text, ISODateTimeFormat.dateTimeParser())
+      )
     } catch (e: IllegalArgumentException) {
       context.failureOf(
         message = """Problem: ${e.message}
