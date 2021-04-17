@@ -18,11 +18,12 @@ dependencies {
   api project(":one.irradia.fieldrush.api")
   api project(":one.irradia.fieldrush.vanilla")
 
+  api libraries.irradia_mime_impl
   api libraries.junit_jupiter_api
   api libraries.junit_jupiter_engine
   api libraries.slf4j
-  api libraries.irradia_mime_impl
 
+  implementation libraries.kotlin_reflect
   implementation libraries.kotlin_stdlib
 
   testImplementation libraries.logback

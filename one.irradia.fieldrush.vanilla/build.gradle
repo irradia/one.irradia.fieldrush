@@ -17,11 +17,12 @@
 dependencies {
   api project(":one.irradia.fieldrush.api")
 
-  api libraries.kotlin_stdlib
-  api libraries.joda_time
+  api libraries.google_guava
   api libraries.irradia_mime_api
   api libraries.irradia_mime_impl
-  api libraries.google_guava
+  api libraries.joda_time
+  api libraries.kotlin_reflect
+  api libraries.kotlin_stdlib
 
   compileOnly libraries.osgi_bundle_annotation
 }
