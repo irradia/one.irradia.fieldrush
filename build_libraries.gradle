@@ -1,0 +1,40 @@
+/*
+ * Copyright © 2021 <code@irradia.one> http://www.irradia.one
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+ * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+ext.kotlin_version = "1.4.20"
+
+ext.versions = [
+  junit_jupiter: '5.7.1',
+]
+
+ext.libraries = [
+  osgi_bundle_annotation     : "org.osgi:org.osgi.annotation.bundle:1.0.0",
+  kotlin_reflect             : "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version",
+  kotlin_stdlib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
+  junit                      : "junit:junit:4.12",
+  junit_jupiter_api          : "org.junit.jupiter:junit-jupiter-api:${versions.junit_jupiter}",
+  junit_jupiter_engine       : "org.junit.jupiter:junit-jupiter-engine:${versions.junit_jupiter}",
+  android_support_test_rules : "com.android.support.test:rules:1.0.2",
+  android_support_test_runner: "com.android.support.test:runner:1.0.2",
+  android_test_orchestrator  : "com.android.support.test:orchestrator:1.0.2",
+  joda_time                  : "joda-time:joda-time:2.10.6",
+  irradia_mime_api           : "one.irradia.mime:one.irradia.mime.api:1.1.1",
+  irradia_mime_impl          : "one.irradia.mime:one.irradia.mime.vanilla:1.1.1",
+  google_guava               : "com.google.guava:guava:27.1-android",
+  slf4j                      : "org.slf4j:slf4j-api:1.8.0-beta4",
+  logback                    : "ch.qos.logback:logback-classic:1.3.0-alpha4",
+  jackson                    : "com.fasterxml.jackson.core:jackson-core:2.10.2"
+]

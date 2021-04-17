@@ -11,13 +11,10 @@ import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.fieldrush.vanilla.FRValueParsers
 import one.irradia.mime.vanilla.MIMEParser
-import org.hamcrest.core.StringContains
 import org.joda.time.Instant
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -33,10 +30,6 @@ abstract class FRParserContract {
   private lateinit var parsers: FRParserProviderType
   private lateinit var valueParsers: FRValueParserProviderType
   private lateinit var logger: Logger
-
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
 
   private fun resource(name: String): InputStream {
     val path = "/one/irradia/fieldrush/tests/$name"
@@ -59,7 +52,7 @@ abstract class FRParserContract {
     }
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.parsers = this.parsers()
     this.valueParsers = this.valueParsers()
@@ -72,7 +65,7 @@ abstract class FRParserContract {
     }
 
     override fun onCompleted(context: FRParserContextType): FRParseResult<Unit> {
-      return FRParseResult.succeed(Unit)
+      return FRParseResult.succeed(warnings = listOf(), Unit)
     }
   }
 
@@ -101,7 +94,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(BigInteger.valueOf(23), parsed)
+      Assertions.assertEquals(BigInteger.valueOf(23), parsed)
     }
   }
 
@@ -116,7 +109,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals("23", parsed)
+      Assertions.assertEquals("23", parsed)
     }
   }
 
@@ -131,7 +124,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals("23", parsed)
+      Assertions.assertEquals("23", parsed)
     }
   }
 
@@ -145,7 +138,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("An integer"))
+      Assertions.assertTrue(failed.errors[0].message.contains("An integer"))
     }
   }
 
@@ -160,7 +153,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(true, parsed)
+      Assertions.assertEquals(true, parsed)
     }
   }
 
@@ -175,7 +168,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(false, parsed)
+      Assertions.assertEquals(false, parsed)
     }
   }
 
@@ -189,7 +182,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("A boolean"))
+      Assertions.assertTrue(failed.errors[0].message.contains("A boolean"))
     }
   }
 
@@ -204,7 +197,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(23.0, parsed, 0.0)
+      Assertions.assertEquals(23.0, parsed, 0.0)
     }
   }
 
@@ -218,7 +211,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("A floating-point"))
+      Assertions.assertTrue(failed.errors[0].message.contains("A floating-point"))
     }
   }
 
@@ -233,7 +226,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(URI.create("http://www.example.com"), parsed)
+      Assertions.assertEquals(URI.create("http://www.example.com"), parsed)
     }
   }
 
@@ -247,7 +240,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("A valid URI"))
+      Assertions.assertTrue(failed.errors[0].message.contains("A valid URI"))
     }
   }
 
@@ -256,13 +249,13 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("not-scalar-0.json"),
-      rootParser = FRValueParsers.forScalar({ FRParseResult.succeed(Unit) }))
+      rootParser = FRValueParsers.forScalar({ FRParseResult.succeed(warnings = listOf(), Unit) }))
       .use { parser ->
         val result = parser.parse()
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertThat(failed.errors[0].message, StringContains("A scalar value"))
+        Assertions.assertTrue(failed.errors[0].message.contains("A scalar value"))
       }
   }
 
@@ -277,7 +270,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(MIMEParser.parseRaisingException("text/plain"), parsed)
+      Assertions.assertEquals(MIMEParser.parseRaisingException("text/plain"), parsed)
     }
   }
 
@@ -291,7 +284,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertThat(failed.errors[0].message, StringContains("A valid MIME"))
+      Assertions.assertTrue(failed.errors[0].message.contains("A valid MIME"))
     }
   }
 
@@ -306,7 +299,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals("xyz", parsed)
+      Assertions.assertEquals("xyz", parsed)
     }
   }
 
@@ -345,9 +338,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
-        Assert.assertEquals(BigInteger.valueOf(100), parsed.y)
-        Assert.assertEquals(BigInteger.valueOf(7), parsed.z)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assertions.assertEquals(BigInteger.valueOf(100), parsed.y)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed.z)
       }
   }
 
@@ -363,9 +356,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
-        Assert.assertEquals(BigInteger.valueOf(24), parsed.y)
-        Assert.assertEquals(BigInteger.valueOf(25), parsed.z)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assertions.assertEquals(BigInteger.valueOf(24), parsed.y)
+        Assertions.assertEquals(BigInteger.valueOf(25), parsed.z)
       }
   }
 
@@ -380,10 +373,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("An integer"))
-        Assert.assertThat(failed.errors[1].message, StringContains("An integer"))
-        Assert.assertThat(failed.errors[2].message, StringContains("An integer"))
+        Assertions.assertEquals(3, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("An integer"))
+        Assertions.assertTrue(failed.errors[1].message.contains("An integer"))
+        Assertions.assertTrue(failed.errors[2].message.contains("An integer"))
       }
   }
 
@@ -398,10 +391,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Missing a required field 'x'"))
-        Assert.assertThat(failed.errors[1].message, StringContains("Missing a required field 'y'"))
-        Assert.assertThat(failed.errors[2].message, StringContains("Missing a required field 'z'"))
+        Assertions.assertEquals(3, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Missing a required field 'x'"))
+        Assertions.assertTrue(failed.errors[1].message.contains("Missing a required field 'y'"))
+        Assertions.assertTrue(failed.errors[2].message.contains("Missing a required field 'z'"))
       }
   }
 
@@ -416,8 +409,8 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+        Assertions.assertEquals(1, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: '{'"))
       }
   }
 
@@ -432,10 +425,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: A scalar value"))
-        Assert.assertThat(failed.errors[1].message, StringContains("Expected: A scalar value"))
-        Assert.assertThat(failed.errors[2].message, StringContains("Expected: A scalar value"))
+        Assertions.assertEquals(3, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: A scalar value"))
+        Assertions.assertTrue(failed.errors[1].message.contains("Expected: A scalar value"))
+        Assertions.assertTrue(failed.errors[2].message.contains("Expected: A scalar value"))
       }
   }
 
@@ -465,17 +458,17 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
-        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
-        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+        Assertions.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assertions.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assertions.assertEquals(BigInteger.valueOf(3), parsed[0].z)
 
-        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
-        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
-        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+        Assertions.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assertions.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assertions.assertEquals(BigInteger.valueOf(6), parsed[1].z)
 
-        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
-        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
-        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assertions.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assertions.assertEquals(BigInteger.valueOf(9), parsed[2].z)
       }
   }
 
@@ -491,17 +484,17 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
-        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
-        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+        Assertions.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assertions.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assertions.assertEquals(BigInteger.valueOf(3), parsed[0].z)
 
-        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
-        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
-        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+        Assertions.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assertions.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assertions.assertEquals(BigInteger.valueOf(6), parsed[1].z)
 
-        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
-        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
-        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assertions.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assertions.assertEquals(BigInteger.valueOf(9), parsed[2].z)
       }
   }
 
@@ -516,10 +509,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
-        Assert.assertThat(failed.errors[1].message, StringContains("Expected: '{'"))
-        Assert.assertThat(failed.errors[2].message, StringContains("Expected: '{'"))
+        Assertions.assertEquals(3, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: '{'"))
+        Assertions.assertTrue(failed.errors[1].message.contains("Expected: '{'"))
+        Assertions.assertTrue(failed.errors[2].message.contains("Expected: '{'"))
       }
   }
 
@@ -534,8 +527,8 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '['"))
+        Assertions.assertEquals(1, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: '['"))
       }
   }
 
@@ -550,8 +543,8 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: A scalar value"))
+        Assertions.assertEquals(1, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: A scalar value"))
       }
   }
 
@@ -586,9 +579,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(4), parsed[0].x)
-        Assert.assertEquals(BigInteger.valueOf(5), parsed[0].y)
-        Assert.assertEquals(BigInteger.valueOf(6), parsed[0].z)
+        Assertions.assertEquals(BigInteger.valueOf(4), parsed[0].x)
+        Assertions.assertEquals(BigInteger.valueOf(5), parsed[0].y)
+        Assertions.assertEquals(BigInteger.valueOf(6), parsed[0].z)
       }
   }
 
@@ -604,9 +597,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result[0]
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
-        Assert.assertEquals(BigInteger.valueOf(100), parsed.y)
-        Assert.assertEquals(BigInteger.valueOf(7), parsed.z)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assertions.assertEquals(BigInteger.valueOf(100), parsed.y)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed.z)
       }
   }
 
@@ -622,17 +615,17 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(1), parsed[0].x)
-        Assert.assertEquals(BigInteger.valueOf(2), parsed[0].y)
-        Assert.assertEquals(BigInteger.valueOf(3), parsed[0].z)
+        Assertions.assertEquals(BigInteger.valueOf(1), parsed[0].x)
+        Assertions.assertEquals(BigInteger.valueOf(2), parsed[0].y)
+        Assertions.assertEquals(BigInteger.valueOf(3), parsed[0].z)
 
-        Assert.assertEquals(BigInteger.valueOf(4), parsed[1].x)
-        Assert.assertEquals(BigInteger.valueOf(5), parsed[1].y)
-        Assert.assertEquals(BigInteger.valueOf(6), parsed[1].z)
+        Assertions.assertEquals(BigInteger.valueOf(4), parsed[1].x)
+        Assertions.assertEquals(BigInteger.valueOf(5), parsed[1].y)
+        Assertions.assertEquals(BigInteger.valueOf(6), parsed[1].z)
 
-        Assert.assertEquals(BigInteger.valueOf(7), parsed[2].x)
-        Assert.assertEquals(BigInteger.valueOf(8), parsed[2].y)
-        Assert.assertEquals(BigInteger.valueOf(9), parsed[2].z)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed[2].x)
+        Assertions.assertEquals(BigInteger.valueOf(8), parsed[2].y)
+        Assertions.assertEquals(BigInteger.valueOf(9), parsed[2].z)
       }
   }
 
@@ -647,10 +640,10 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
-        Assert.assertThat(failed.errors[0].message, StringContains("Expected: '{'"))
+        Assertions.assertEquals(3, failed.errors.size)
+        Assertions.assertTrue(failed.errors[0].message.contains("Expected: '{'"))
+        Assertions.assertTrue(failed.errors[1].message.contains("Expected: '{'"))
+        Assertions.assertTrue(failed.errors[2].message.contains("Expected: '{'"))
       }
   }
 
@@ -667,7 +660,7 @@ abstract class FRParserContract {
             this.dumpParseResult(result)
 
             val failed = result as FRParseResult.FRParseFailed
-            Assert.assertEquals(1, failed.errors.size)
+            Assertions.assertEquals(1, failed.errors.size)
           }
       }
     }
@@ -706,9 +699,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.y)
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.z)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.y)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.z)
       }
   }
 
@@ -726,9 +719,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(23), parsed.x)
-        Assert.assertEquals(BigInteger.valueOf(100), parsed.y)
-        Assert.assertEquals(BigInteger.valueOf(7), parsed.z)
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed.x)
+        Assertions.assertEquals(BigInteger.valueOf(100), parsed.y)
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed.z)
       }
   }
 
@@ -745,7 +738,7 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
+        Assertions.assertEquals(1, failed.errors.size)
       }
   }
 
@@ -769,9 +762,9 @@ abstract class FRParserContract {
 
         val success = result as FRParseResult.FRParseSucceeded
         val parsed = success.result
-        Assert.assertEquals(BigInteger.valueOf(23), parsed["x"])
-        Assert.assertEquals(BigInteger.valueOf(100), parsed["y"])
-        Assert.assertEquals(BigInteger.valueOf(7), parsed["z"])
+        Assertions.assertEquals(BigInteger.valueOf(23), parsed["x"])
+        Assertions.assertEquals(BigInteger.valueOf(100), parsed["y"])
+        Assertions.assertEquals(BigInteger.valueOf(7), parsed["z"])
       }
   }
 
@@ -786,7 +779,7 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
+        Assertions.assertEquals(1, failed.errors.size)
       }
   }
 
@@ -801,7 +794,7 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(3, failed.errors.size)
+        Assertions.assertEquals(3, failed.errors.size)
       }
   }
 
@@ -816,7 +809,7 @@ abstract class FRParserContract {
         this.dumpParseResult(result)
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertEquals(1, failed.errors.size)
+        Assertions.assertEquals(1, failed.errors.size)
       }
   }
 
@@ -831,7 +824,7 @@ abstract class FRParserContract {
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(Instant.parse("2010-01-01T00:00:10"), parsed)
+      Assertions.assertEquals(Instant.parse("2010-01-01T00:00:10"), parsed)
     }
   }
 
@@ -845,7 +838,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertEquals(1, failed.errors.size)
+      Assertions.assertEquals(1, failed.errors.size)
     }
   }
 
@@ -859,7 +852,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertEquals(1, failed.errors.size)
+      Assertions.assertEquals(1, failed.errors.size)
     }
   }
 
@@ -873,7 +866,7 @@ abstract class FRParserContract {
       this.dumpParseResult(result)
 
       val failed = result as FRParseResult.FRParseFailed
-      Assert.assertEquals(1, failed.errors.size)
+      Assertions.assertEquals(1, failed.errors.size)
     }
   }
 
@@ -882,13 +875,13 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("string-ok-0.json"),
-      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s)})).use { parser ->
+      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s) })).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals("xyz", parsed)
+      Assertions.assertEquals("xyz", parsed)
     }
   }
 
@@ -897,13 +890,13 @@ abstract class FRParserContract {
     this.parsers.createParser(
       uri = URI.create("urn:test"),
       stream = resource("null.json"),
-      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s)})).use { parser ->
+      rootParser = FRValueParsers.forScalarOrNull({ s -> FRParseResult.succeed(s) })).use { parser ->
       val result = parser.parse()
       this.dumpParseResult(result)
 
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
-      Assert.assertEquals(null, parsed)
+      Assertions.assertEquals(null, parsed)
     }
   }
 }

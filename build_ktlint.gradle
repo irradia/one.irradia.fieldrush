@@ -14,15 +14,34 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+repositories {
+  jcenter()
+}
+
+configurations {
+  ktlint
+}
+
 dependencies {
-  api project(":one.irradia.fieldrush.api")
+  ktlint "com.pinterest:ktlint:0.40.0"
+}
 
-  api libraries.google_guava
-  api libraries.irradia_mime_api
-  api libraries.irradia_mime_impl
-  api libraries.joda_time
-  api libraries.kotlin_reflect
-  api libraries.kotlin_stdlib
+task ktlint(type: JavaExec, group: "quality") {
+  description = "Check Kotlin code style."
+  classpath = configurations.ktlint
+  main = "com.pinterest.ktlint.Main"
+  args "src/**/*.kt"
+}
 
-  compileOnly libraries.osgi_bundle_annotation
+task ktlintFormat(type: JavaExec, group: "quality") {
+  description = "Fix Kotlin code style deviations."
+  classpath = configurations.ktlint
+  main = "com.pinterest.ktlint.Main"
+  args "-F", "src/**/*.kt"
+}
+
+afterEvaluate {
+  tasks.withType(Test) {
+    dependsOn 'ktlint'
+  }
 }

@@ -8,12 +8,10 @@ import one.irradia.fieldrush.api.FRParserObjectSchema
 import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.vanilla.FRValueParsers
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -38,11 +36,7 @@ abstract class FRParserFuzzing {
   private lateinit var logger: Logger
   private lateinit var executor: ExecutorService
 
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
-
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.parsers = this.parsers()
     this.valueParsers = this.valueParsers()
@@ -50,9 +44,8 @@ abstract class FRParserFuzzing {
     this.executor = Executors.newSingleThreadExecutor()
   }
 
-  @After
-  fun testTearDown()
-  {
+  @AfterEach
+  fun testTearDown() {
     this.executor.shutdown()
   }
 
@@ -65,7 +58,7 @@ abstract class FRParserFuzzing {
     return data
   }
 
-  private fun corruptResource(name:String, seed:Long): InputStream {
+  private fun corruptResource(name: String, seed: Long): InputStream {
     val data = resourceBytes(name)
     val rng = Random(seed)
     val chars = listOf('[', ']', '{', '}', ',')
@@ -94,7 +87,7 @@ abstract class FRParserFuzzing {
     override fun schema(context: FRParserContextType): FRParserObjectSchema {
       return FRParserObjectSchema(
         fields = listOf(),
-        unknownField = { _,_ ->
+        unknownField = { _, _ ->
           this.valueParsers.forScalarArrayOrObject(
             forScalar = { FRParserIgnores() },
             forArray = { this.valueParsers.forArrayMonomorphic({ FRParserIgnores() }) },
@@ -103,7 +96,7 @@ abstract class FRParserFuzzing {
     }
 
     override fun onCompleted(context: FRParserContextType): FRParseResult<Unit> {
-      return FRParseResult.succeed(Unit)
+      return FRParseResult.succeed(warnings = listOf(), x = Unit)
     }
   }
 
@@ -241,19 +234,21 @@ abstract class FRParserFuzzing {
       rootParser = VisitAll(this.valueParsers))
       .use { parser ->
 
-        val future = this.executor.submit(Callable{ parser.parse() })
+        val future = this.executor.submit(Callable { parser.parse() })
         val result = future.get(10L, TimeUnit.SECONDS)
 
         this.dumpParseResult(result)
         this.logger.debug("result for: 0x{}", seed.toString(16))
-        Assert.assertTrue(
-          "fuzz ${seed.toString(16)} should have failed",
-          result is FRParseResult.FRParseFailed)
+        Assertions.assertTrue(
+          result is FRParseResult.FRParseFailed,
+          "fuzz ${seed.toString(16)} should have failed"
+        )
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertTrue(
-          "fuzz ${seed.toString(16)} should have failed",
-          failed.errors.size >= 1)
+        Assertions.assertTrue(
+          failed.errors.size >= 1,
+          "fuzz ${seed.toString(16)} should have failed"
+        )
       }
   }
 
@@ -264,19 +259,21 @@ abstract class FRParserFuzzing {
       rootParser = this.valueParsers.forObjectMap({ this.valueParsers.forString() }))
       .use { parser ->
 
-        val future = this.executor.submit(Callable{ parser.parse() })
+        val future = this.executor.submit(Callable { parser.parse() })
         val result = future.get(10L, TimeUnit.SECONDS)
 
         this.dumpParseResult(result)
         this.logger.debug("result for: 0x{}", seed.toString(16))
-        Assert.assertTrue(
-          "fuzz ${seed.toString(16)} should have failed",
-          result is FRParseResult.FRParseFailed)
+        Assertions.assertTrue(
+          result is FRParseResult.FRParseFailed,
+          "fuzz ${seed.toString(16)} should have failed"
+        )
 
         val failed = result as FRParseResult.FRParseFailed
-        Assert.assertTrue(
-          "fuzz ${seed.toString(16)} should have failed",
-          failed.errors.size >= 1)
+        Assertions.assertTrue(
+          failed.errors.size >= 1,
+          "fuzz ${seed.toString(16)} should have failed"
+        )
       }
   }
 

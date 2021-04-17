@@ -19,7 +19,7 @@ class FRValueParserOrNull<T>(
     return when (context.jsonStream.currentToken) {
       null, JsonToken.VALUE_NULL -> {
         context.jsonStream.skip()
-        FRParseResult.succeed(null)
+        FRParseResult.succeed(warnings = listOf(), x = null)
       }
       else -> {
         this.existing.parse(context).map { x -> x }

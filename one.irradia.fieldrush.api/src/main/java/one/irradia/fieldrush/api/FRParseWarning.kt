@@ -1,26 +1,26 @@
 package one.irradia.fieldrush.api
 
 /**
- * A specific parse error.
+ * A specific parse warning.
  */
 
-data class FRParseError(
+data class FRParseWarning(
 
   /**
-   * The parser that produced the error. This will typically be the name of the core parser, or
+   * The parser that produced the warning. This will typically be the name of the core parser, or
    * the name of one of the extension parsers.
    */
 
   val producer: String,
 
   /**
-   * Lexical information for the parse error.
+   * Lexical information for the parse warning.
    */
 
   val position: FRLexicalPosition,
 
   /**
-   * The error message.
+   * The warning message.
    */
 
   val message: String,

@@ -10,7 +10,8 @@ import one.irradia.fieldrush.api.FRParseResult.FRParseSucceeded
  */
 
 abstract class FRAbstractParserArray<T>(
-  private val onReceive: (FRParserContextType, List<T>) -> Unit) : FRParserArrayType<List<T>> {
+  private val onReceive: (FRParserContextType, List<T>) -> Unit
+) : FRParserArrayType<List<T>> {
 
   override fun parse(context: FRParserContextType): FRParseResult<List<T>> {
     context.trace(this.javaClass, "start: ${context.jsonStream.currentToken}")
@@ -24,9 +25,13 @@ abstract class FRAbstractParserArray<T>(
       return failure
     }
 
+    val warnings = mutableListOf<FRParseWarning>()
     val errors = mutableListOf<FRParseError>()
     if (!this.moveToNextToken(context, errors)) {
-      return FRParseFailed(errors.toList())
+      return FRParseFailed(
+        warnings = warnings.toList(),
+        errors = errors.toList()
+      )
     }
 
     var index = 0
@@ -64,12 +69,17 @@ abstract class FRAbstractParserArray<T>(
     context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
 
     this.skipContent(context, errors)
-    return this.completeResult(errors, context)
+    return this.completeResult(
+      warnings = warnings,
+      errors = errors,
+      context = context
+    )
   }
 
   private fun skipContent(
     context: FRParserContextType,
-    errors: MutableList<FRParseError>): Boolean {
+    errors: MutableList<FRParseError>
+  ): Boolean {
     val skip = context.jsonStream.skip()
     if (skip is FRParseFailed) {
       errors.addAll(skip.errors)
@@ -80,7 +90,8 @@ abstract class FRAbstractParserArray<T>(
 
   private fun moveToNextToken(
     context: FRParserContextType,
-    errors: MutableList<FRParseError>): Boolean {
+    errors: MutableList<FRParseError>
+  ): Boolean {
     val nextToken = context.jsonStream.nextToken()
     if (nextToken is FRParseFailed) {
       errors.addAll(nextToken.errors)
@@ -90,8 +101,13 @@ abstract class FRAbstractParserArray<T>(
   }
 
   private fun completeResult(
+    warnings: MutableList<FRParseWarning>,
     errors: MutableList<FRParseError>,
-    context: FRParserContextType): FRParseResult<List<T>> =
-    FRParseResult.errorsOr(errors.toList()) { this.onCompleted(context) }
+    context: FRParserContextType
+  ): FRParseResult<List<T>> =
+    FRParseResult.errorsOr(
+      warnings = warnings.toList(),
+      errors = errors.toList()
+    ) { this.onCompleted(context) }
       .onSuccess { this.onReceive.invoke(context, it) }
 }

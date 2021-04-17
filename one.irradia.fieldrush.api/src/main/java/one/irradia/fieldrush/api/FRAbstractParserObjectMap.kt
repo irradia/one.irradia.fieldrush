@@ -24,9 +24,13 @@ abstract class FRAbstractParserObjectMap<T>(
       return failure
     }
 
+    val warnings = mutableListOf<FRParseWarning>()
     val errors = mutableListOf<FRParseError>()
     if (!this.moveToNextToken(context, errors)) {
-      return FRParseFailed(errors.toList())
+      return FRParseFailed(
+        warnings = warnings.toList(),
+        errors = errors.toList()
+      )
     }
 
     val map = mutableMapOf<String, T>()
@@ -60,12 +64,18 @@ abstract class FRAbstractParserObjectMap<T>(
 
     context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
     this.moveToNextToken(context, errors)
-    return parseFinish(errors, context, map.toMap())
+    return parseFinish(
+      warnings = warnings,
+      errors = errors,
+      context = context,
+      map = map.toMap()
+    )
   }
 
   private fun moveToNextToken(
     context: FRParserContextType,
-    errors: MutableList<FRParseError>): Boolean {
+    errors: MutableList<FRParseError>
+  ): Boolean {
     val nextToken = context.jsonStream.nextToken()
     if (nextToken is FRParseFailed) {
       errors.addAll(nextToken.errors)
@@ -81,9 +91,14 @@ abstract class FRAbstractParserObjectMap<T>(
   }
 
   private fun parseFinish(
+    warnings: MutableList<FRParseWarning>,
     errors: MutableList<FRParseError>,
     context: FRParserContextType,
-    map: Map<String, T>): FRParseResult<Map<String, T>> =
-    FRParseResult.errorsOr(errors.toList()) { FRParseResult.succeed(map) }
+    map: Map<String, T>
+  ): FRParseResult<Map<String, T>> =
+    FRParseResult.errorsOr(
+      warnings = warnings.toList(),
+      errors = errors.toList()
+    ) { FRParseResult.succeed(warnings, map) }
       .onSuccess { this.onReceive.invoke(context, it) }
 }

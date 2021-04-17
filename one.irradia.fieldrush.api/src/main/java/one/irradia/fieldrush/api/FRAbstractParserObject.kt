@@ -25,9 +25,13 @@ abstract class FRAbstractParserObject<T>(
       return failure
     }
 
+    val warnings = mutableListOf<FRParseWarning>()
     val errors = mutableListOf<FRParseError>()
     if (!this.moveToNextToken(context, errors)) {
-      return FRParseFailed(errors.toList())
+      return FRParseFailed(
+        warnings = warnings.toList(),
+        errors = errors.toList()
+      )
     }
 
     val schema = this.schema(context)
@@ -78,13 +82,18 @@ abstract class FRAbstractParserObject<T>(
     context.trace(this.javaClass, "end: ${context.jsonStream.currentToken}")
     this.moveToNextToken(context, errors)
     this.checkRequiredFields(requiredFieldNames, errors, context)
-    return parseFinish(errors, context)
+    return parseFinish(
+      warnings = warnings,
+      errors = errors,
+      context = context
+    )
   }
 
   private fun checkRequiredFields(
     requiredFieldNames: MutableSet<String>,
     errors: MutableList<FRParseError>,
-    context: FRParserContextType) {
+    context: FRParserContextType
+  ) {
     for (name in requiredFieldNames) {
       errors.add(context.errorOf("Missing a required field '${name}'"))
     }
@@ -92,7 +101,8 @@ abstract class FRAbstractParserObject<T>(
 
   private fun moveToNextToken(
     context: FRParserContextType,
-    errors: MutableList<FRParseError>): Boolean {
+    errors: MutableList<FRParseError>
+  ): Boolean {
     val nextToken = context.jsonStream.nextToken()
     if (nextToken is FRParseFailed) {
       errors.addAll(nextToken.errors)
@@ -108,8 +118,13 @@ abstract class FRAbstractParserObject<T>(
   }
 
   private fun parseFinish(
+    warnings: MutableList<FRParseWarning>,
     errors: MutableList<FRParseError>,
-    context: FRParserContextType): FRParseResult<T> =
-    FRParseResult.errorsOr(errors.toList()) { this.onCompleted(context) }
+    context: FRParserContextType
+  ): FRParseResult<T> =
+    FRParseResult.errorsOr(
+      warnings = warnings.toList(),
+      errors = errors.toList()
+    ) { this.onCompleted(context) }
       .onSuccess { this.onReceive.invoke(context, it) }
 }
