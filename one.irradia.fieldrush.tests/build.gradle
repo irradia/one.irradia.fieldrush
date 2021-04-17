@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 <code@irradia.one> http://www.irradia.one
+ * Copyright © 2021 <code@irradia.one> http://www.irradia.one
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,19 +14,17 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-configurations {
-  api.extendsFrom dependencyJUnit
-  api.extendsFrom dependencySLF4J
-  api.extendsFrom dependencyIrradiaMimeImpl
-
-  implementation.extendsFrom dependencyKotlinStdlib
-
-  testImplementation.extendsFrom dependencyLogback
-}
-
 dependencies {
   api project(":one.irradia.fieldrush.api")
   api project(":one.irradia.fieldrush.vanilla")
+
+  api libraries.junit
+  api libraries.slf4j
+  api libraries.irradia_mime_impl
+
+  implementation libraries.kotlin_stdlib
+
+  testImplementation libraries.logback
 }
 
 /*

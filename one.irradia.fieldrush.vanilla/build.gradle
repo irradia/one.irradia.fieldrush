@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 <code@irradia.one> http://www.irradia.one
+ * Copyright © 2021 <code@irradia.one> http://www.irradia.one
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,16 +14,14 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-configurations {
-  api.extendsFrom dependencyKotlinStdlib
-  api.extendsFrom dependencyJodaTime
-  api.extendsFrom dependencyIrradiaMimeAPI
-  api.extendsFrom dependencyIrradiaMimeImpl
-  api.extendsFrom dependencyGoogleGuava
-
-  compileOnly.extendsFrom dependencyOSGiBundleAnnotation
-}
-
 dependencies {
   api project(":one.irradia.fieldrush.api")
+
+  api libraries.kotlin_stdlib
+  api libraries.joda_time
+  api libraries.irradia_mime_api
+  api libraries.irradia_mime_impl
+  api libraries.google_guava
+
+  compileOnly libraries.osgi_bundle_annotation
 }
