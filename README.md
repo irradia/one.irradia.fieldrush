@@ -71,7 +71,6 @@ the freedom to use other implementations of the API if desired.
 |Module|Description|
 |------|-----------|
 | [one.irradia.fieldrush.api](https://github.com/irradia/one.irradia.fieldrush/tree/develop/one.irradia.fieldrush.api) | Core API
-| [one.irradia.fieldrush.tests.device](https://github.com/irradia/one.irradia.fieldrush/tree/develop/one.irradia.fieldrush.tests.device) | Unit tests that execute on real or emulated devices
 | [one.irradia.fieldrush.tests](https://github.com/irradia/one.irradia.fieldrush/tree/develop/one.irradia.fieldrush.tests) | Unit tests that can execute without needing a real or emulated device
 | [one.irradia.fieldrush.vanilla](https://github.com/irradia/one.irradia.fieldrush/tree/develop/one.irradia.fieldrush.vanilla) | Vanilla implementation
 
