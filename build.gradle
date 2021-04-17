@@ -355,12 +355,16 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
         }
       }
 
-      maven {
-        name = "centralSnapshots"
-        url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        credentials(PasswordCredentials) {
-          username mavenCentralUsername
-          password mavenCentralPassword
+      if ("${VERSION_NAME}".endsWith("-SNAPSHOT")) {
+        logger.info("enabling Sonatype Snapshots publishing repository")
+
+        maven {
+          name = "centralSnapshots"
+          url = "https://oss.sonatype.org/content/repositories/snapshots/"
+          credentials(PasswordCredentials) {
+            username mavenCentralUsername
+            password mavenCentralPassword
+          }
         }
       }
     }
