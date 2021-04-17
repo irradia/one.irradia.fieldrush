@@ -19,8 +19,6 @@ buildscript {
     throw new GradleException("Gradle version 6.7 is required (received $gradle.gradleVersion)")
   }
 
-  ext.kotlin_version = "1.4.32"
-
   apply from: file("$rootDir/build_libraries.gradle")
 
   repositories {
