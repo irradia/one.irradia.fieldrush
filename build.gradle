@@ -140,6 +140,32 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
       }
       break
 
+    case "apk":
+      logger.info("Configuring ${project} (${POM_PACKAGING}) as Android application project")
+
+      apply plugin: "com.android.application"
+      apply plugin: "kotlin-android"
+
+      android {
+        compileSdkVersion androidCompileSDKVersion
+        buildToolsVersion androidBuildToolsVersion
+
+        defaultConfig {
+          minSdkVersion androidMinimumSDKVersion
+          targetSdkVersion androidTargetSDKVersion
+          testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        }
+        compileOptions {
+          sourceCompatibility JavaVersion.VERSION_1_8
+          targetCompatibility JavaVersion.VERSION_1_8
+        }
+        testOptions {
+          execution "ANDROID_TEST_ORCHESTRATOR"
+          animationsDisabled = true
+        }
+      }
+      break
+
     case "aar":
       logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library project")
 
@@ -230,7 +256,7 @@ Automatic-Module-Name: ${POM_AUTOMATIC_MODULE_NAME}
             "${VERSION_NAME_PREVIOUS}",
             "--ignoreMissingOld",
             "--newJar",
-            "${buildDir}/outputs/${POM_PACKAGING}/${POM_ARTIFACT_ID}.${POM_PACKAGING}",
+            "${buildDir}/outputs/${POM_PACKAGING}/${POM_ARTIFACT_ID}-debug.${POM_PACKAGING}",
             "--newJarVersion",
             "${VERSION_NAME}",
             "--textReport",
