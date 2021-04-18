@@ -12,11 +12,13 @@ import org.joda.time.format.ISODateTimeFormat
  */
 
 class FRValueParserTimestamp(
-  onReceive: (FRParserContextType, Instant) -> Unit) : FRValueParserScalar<Instant>(onReceive) {
+  onReceive: (FRParserContextType, Instant) -> Unit
+) : FRValueParserScalar<Instant>(onReceive) {
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<Instant> {
+    text: String
+  ): FRParseResult<Instant> {
     return try {
       FRParseSucceeded(
         warnings = listOf(),

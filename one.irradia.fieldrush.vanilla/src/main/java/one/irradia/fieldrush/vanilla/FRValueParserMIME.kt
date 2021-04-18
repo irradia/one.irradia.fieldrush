@@ -12,9 +12,13 @@ import one.irradia.mime.api.MIMEType
 
 class FRValueParserMIME(
   private val parsers: (String) -> MIMEParserType,
-  onReceive: (FRParserContextType, MIMEType) -> Unit) : FRValueParserScalar<MIMEType>(onReceive) {
+  onReceive: (FRParserContextType, MIMEType) -> Unit
+) : FRValueParserScalar<MIMEType>(onReceive) {
 
-  override fun ofText(context: FRParserContextType, text: String): FRParseResult<MIMEType> {
+  override fun ofText(
+    context: FRParserContextType,
+    text: String
+  ): FRParseResult<MIMEType> {
     return try {
       FRParseSucceeded(warnings = listOf(), result = this.parsers.invoke(text).parseOrException())
     } catch (e: Exception) {

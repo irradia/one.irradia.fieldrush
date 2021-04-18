@@ -10,8 +10,8 @@ import one.irradia.fieldrush.api.FRValueParserType
 
 class FRParserArrayOrSingle<T>(
   val onReceive: (FRParserContextType, List<T>) -> Unit,
-  private val forItem: (FRParserContextType) -> FRValueParserType<T>)
-  : FRAbstractParserArrayOrSingle<T>(onReceive) {
+  private val forItem: (FRParserContextType) -> FRValueParserType<T>
+) : FRAbstractParserArrayOrSingle<T>(onReceive) {
 
   override fun onArray(context: FRParserContextType): FRValueParserType<List<T>> =
     FRParserArrayMonomorphic(this.onReceive, this.forItem)

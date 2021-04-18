@@ -12,8 +12,8 @@ import one.irradia.fieldrush.api.FRParserObjectSchema
 class FRParserObject<T>(
   receiver: (FRParserContextType, T) -> Unit,
   private val onFieldsCompleted: (FRParserContextType) -> FRParseResult<T>,
-  private val onSchema: (FRParserContextType) -> FRParserObjectSchema)
-  : FRAbstractParserObject<T>(receiver) {
+  private val onSchema: (FRParserContextType) -> FRParserObjectSchema
+) : FRAbstractParserObject<T>(receiver) {
 
   override fun schema(context: FRParserContextType): FRParserObjectSchema =
     this.onSchema.invoke(context)

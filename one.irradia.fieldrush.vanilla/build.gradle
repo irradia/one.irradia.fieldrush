@@ -25,4 +25,5 @@ dependencies {
   api libraries.kotlin_stdlib
 
   compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_versioning
 }
