@@ -78,6 +78,7 @@ allprojects {
   version = project.ext["VERSION_NAME"]
 
   repositories {
+    mavenLocal()
     mavenCentral()
     maven {
       name "Sonatype Snapshots"
@@ -121,6 +122,11 @@ subprojects { project ->
       apply plugin: "java"
       apply plugin: "java-library"
       apply plugin: "kotlin"
+
+      java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+      }
 
       /*
        * Apply the Animal Sniffer plugin to check that code is Android compatible.
