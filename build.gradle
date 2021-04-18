@@ -78,6 +78,7 @@ allprojects {
   version = project.ext["VERSION_NAME"]
 
   repositories {
+    mavenLocal()
     mavenCentral()
     maven {
       name "Sonatype Snapshots"
