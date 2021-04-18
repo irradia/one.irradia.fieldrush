@@ -11,7 +11,8 @@ import java.net.URI
 
 internal class FRJSONStream(
   private val documentURI: URI,
-  private val jsonParser: JsonParser) : FRJSONStreamType {
+  private val jsonParser: JsonParser
+) : FRJSONStreamType {
 
   override val currentText: String
     get() = this.jsonParser.text

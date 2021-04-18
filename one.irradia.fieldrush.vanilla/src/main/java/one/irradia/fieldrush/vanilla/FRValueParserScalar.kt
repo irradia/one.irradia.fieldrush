@@ -9,7 +9,8 @@ import one.irradia.fieldrush.api.FRValueParserType
  */
 
 abstract class FRValueParserScalar<T>(
-  private val onReceive: (FRParserContextType, T) -> Unit) : FRValueParserType<T> {
+  private val onReceive: (FRParserContextType, T) -> Unit
+) : FRValueParserType<T> {
 
   /**
    * Called when text must be converted into a more specific type.
@@ -17,7 +18,8 @@ abstract class FRValueParserScalar<T>(
 
   abstract fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<T>
+    text: String
+  ): FRParseResult<T>
 
   final override fun parse(context: FRParserContextType): FRParseResult<T> {
     val token = context.jsonStream.currentToken

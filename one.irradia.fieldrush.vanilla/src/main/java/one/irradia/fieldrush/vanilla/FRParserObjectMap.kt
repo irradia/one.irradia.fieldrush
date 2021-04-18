@@ -11,8 +11,8 @@ import one.irradia.fieldrush.api.FRValueParserType
 
 class FRParserObjectMap<T>(
   private val forKey: (FRParserContextType, String) -> FRValueParserType<T>,
-  onReceive: (FRParserContextType, Map<String, T>) -> Unit)
-  : FRAbstractParserObjectMap<T>(onReceive) {
+  onReceive: (FRParserContextType, Map<String, T>) -> Unit
+) : FRAbstractParserObjectMap<T>(onReceive) {
 
   override fun forKey(context: FRParserContextType, name: String): FRValueParserType<T> =
     this.forKey.invoke(context, name)

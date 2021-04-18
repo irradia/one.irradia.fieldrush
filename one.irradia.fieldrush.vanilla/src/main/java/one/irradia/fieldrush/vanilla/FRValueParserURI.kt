@@ -15,7 +15,8 @@ class FRValueParserURI(
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<URI> {
+    text: String
+  ): FRParseResult<URI> {
     return try {
       FRParseSucceeded(warnings = listOf(), result = URI(text))
     } catch (e: URISyntaxException) {
@@ -23,7 +24,8 @@ class FRValueParserURI(
         message = """Problem: ${e.message}
           | Expected: A valid URI
           | Received: ${text}""".trimMargin(),
-        exception = e)
+        exception = e
+      )
     }
   }
 }

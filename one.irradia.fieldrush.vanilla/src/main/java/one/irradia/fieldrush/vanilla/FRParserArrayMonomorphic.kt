@@ -11,8 +11,8 @@ import one.irradia.fieldrush.api.FRValueParserType
 
 class FRParserArrayMonomorphic<T>(
   onReceive: (FRParserContextType, List<T>) -> Unit,
-  private val forEach: (FRParserContextType) -> FRValueParserType<T>)
-  : FRAbstractParserArray<T>(onReceive) {
+  private val forEach: (FRParserContextType) -> FRValueParserType<T>
+) : FRAbstractParserArray<T>(onReceive) {
 
   private val values = mutableListOf<T>()
 

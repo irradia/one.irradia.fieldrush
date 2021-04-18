@@ -10,11 +10,13 @@ import java.math.BigInteger
  */
 
 class FRValueParserInteger(
-  onReceive: (FRParserContextType, BigInteger) -> Unit) : FRValueParserScalar<BigInteger>(onReceive) {
+  onReceive: (FRParserContextType, BigInteger) -> Unit
+) : FRValueParserScalar<BigInteger>(onReceive) {
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<BigInteger> {
+    text: String
+  ): FRParseResult<BigInteger> {
     return try {
       FRParseSucceeded(warnings = listOf(), result = BigInteger(text))
     } catch (e: NumberFormatException) {

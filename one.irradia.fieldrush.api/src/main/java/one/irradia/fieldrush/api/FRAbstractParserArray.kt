@@ -47,8 +47,7 @@ abstract class FRAbstractParserArray<T>(
       val parser = this.forIndex(context, index)
       if (parser != null) {
         context.trace(this.javaClass, "${index}: created index parser ${parser.javaClass.simpleName}")
-        val result = parser.parse(context.withNextDepth())
-        when (result) {
+        when (val result = parser.parse(context.withNextDepth())) {
           is FRParseSucceeded -> Unit
           is FRParseFailed -> errors.addAll(result.errors)
         }

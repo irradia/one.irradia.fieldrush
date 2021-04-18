@@ -50,7 +50,8 @@ interface FRParserContextType {
 
   fun errorOf(
     message: String,
-    exception: Exception? = null): FRParseError
+    exception: Exception? = null
+  ): FRParseError
 
   /**
    * Construct a failure result using the given message and exception, if any.
@@ -58,6 +59,18 @@ interface FRParserContextType {
 
   fun <T> failureOf(
     message: String,
-    exception: Exception? = null): FRParseResult<T>
+    exception: Exception? = null
+  ): FRParseResult<T>
 
+  /**
+   * Record a warning.
+   */
+
+  fun warn(caller: Class<*>, message: String)
+
+  /**
+   * The current list of warnings.
+   */
+
+  val warnings: List<FRParseWarning>
 }

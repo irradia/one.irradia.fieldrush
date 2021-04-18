@@ -11,8 +11,8 @@ import one.irradia.fieldrush.api.FRValueParserType
 class FRParserScalarOrObject<T>(
   val onReceive: (FRParserContextType, T) -> Unit,
   private val forScalar: (FRParserContextType) -> FRValueParserType<T>,
-  private val forObject: (FRParserContextType) -> FRValueParserType<T>)
-  : FRAbstractParserScalarOrObject<T>(onReceive) {
+  private val forObject: (FRParserContextType) -> FRValueParserType<T>
+) : FRAbstractParserScalarOrObject<T>(onReceive) {
 
   override fun onScalar(context: FRParserContextType): FRValueParserType<T> =
     this.forScalar.invoke(context)

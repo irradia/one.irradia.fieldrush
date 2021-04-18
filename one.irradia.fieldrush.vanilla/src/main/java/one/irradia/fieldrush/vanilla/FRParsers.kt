@@ -9,6 +9,7 @@ import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRParserType
 import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
+import one.irradia.fieldrush.vanilla.internal.FRParserContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.InputStream
@@ -71,11 +72,15 @@ class FRParsers : FRParserProviderType {
       } catch (e: Exception) {
         return FRParseResult.FRParseFailed(
           warnings = listOf(),
-          errors = listOf(FRParseError(
-            producer = "core",
-            position = FRLexicalPosition(this.documentURI, 1, 0),
-            message = e.message ?: "JSON stream failed",
-            exception = e)))
+          errors = listOf(
+            FRParseError(
+              producer = "core",
+              position = FRLexicalPosition(this.documentURI, 1, 0),
+              message = e.message ?: "JSON stream failed",
+              exception = e
+            )
+          )
+        )
       }
 
       val context =
@@ -91,7 +96,7 @@ class FRParsers : FRParserProviderType {
         if (jsonStream.currentToken != null) {
           context.failureOf("Failed to consume all JSON input")
         } else {
-          FRParseResult.succeed(warnings = listOf(), data)
+          FRParseResult.succeed(context.warnings, data)
         }
       }
     }

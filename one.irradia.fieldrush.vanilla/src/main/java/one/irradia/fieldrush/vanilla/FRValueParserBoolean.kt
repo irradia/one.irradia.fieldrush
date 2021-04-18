@@ -9,13 +9,14 @@ import one.irradia.fieldrush.api.FRParserContextType
  */
 
 class FRValueParserBoolean(
-  onReceive: (FRParserContextType, Boolean) -> Unit) : FRValueParserScalar<Boolean>(onReceive) {
+  onReceive: (FRParserContextType, Boolean) -> Unit
+) : FRValueParserScalar<Boolean>(onReceive) {
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<Boolean> {
-    val upper = text.toUpperCase()
-    return when (upper) {
+    text: String
+  ): FRParseResult<Boolean> {
+    return when (text.toUpperCase()) {
       "TRUE" ->
         FRParseSucceeded(warnings = listOf(), result = true)
       "FALSE" ->

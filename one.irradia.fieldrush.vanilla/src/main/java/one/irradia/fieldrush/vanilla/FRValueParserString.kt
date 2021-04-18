@@ -9,12 +9,13 @@ import one.irradia.fieldrush.api.FRParserContextType
  */
 
 class FRValueParserString(
-  onReceive: (FRParserContextType, String) -> Unit) : FRValueParserScalar<String>(onReceive) {
+  onReceive: (FRParserContextType, String) -> Unit
+) : FRValueParserScalar<String>(onReceive) {
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<String> {
+    text: String
+  ): FRParseResult<String> {
     return FRParseSucceeded(warnings = listOf(), result = text)
   }
-
 }

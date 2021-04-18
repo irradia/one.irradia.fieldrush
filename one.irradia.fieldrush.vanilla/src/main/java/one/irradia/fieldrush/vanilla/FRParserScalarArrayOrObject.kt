@@ -12,8 +12,8 @@ class FRParserScalarArrayOrObject<T>(
   val onReceive: (FRParserContextType, List<T>) -> Unit,
   private val forScalar: (FRParserContextType) -> FRValueParserType<T>,
   private val forArray: (FRParserContextType) -> FRValueParserType<List<T>>,
-  private val forObject: (FRParserContextType) -> FRValueParserType<T>)
-  : FRAbstractParserScalarArrayOrObject<T>(onReceive) {
+  private val forObject: (FRParserContextType) -> FRValueParserType<T>
+) : FRAbstractParserScalarArrayOrObject<T>(onReceive) {
 
   override fun onScalar(context: FRParserContextType): FRValueParserType<T> =
     this.forScalar.invoke(context)

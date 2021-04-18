@@ -9,11 +9,13 @@ import one.irradia.fieldrush.api.FRParserContextType
  */
 
 class FRValueParserReal(
-  onReceive: (FRParserContextType, Double) -> Unit) : FRValueParserScalar<Double>(onReceive) {
+  onReceive: (FRParserContextType, Double) -> Unit
+) : FRValueParserScalar<Double>(onReceive) {
 
   override fun ofText(
     context: FRParserContextType,
-    text: String): FRParseResult<Double> {
+    text: String
+  ): FRParseResult<Double> {
     return try {
       FRParseSucceeded(warnings = listOf(), result = java.lang.Double.parseDouble(text))
     } catch (e: NumberFormatException) {

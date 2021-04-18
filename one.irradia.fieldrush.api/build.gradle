@@ -22,6 +22,7 @@ dependencies {
   api libraries.kotlin_reflect
   api libraries.kotlin_stdlib
   api libraries.slf4j
-  
+
   compileOnly libraries.osgi_bundle_annotation
+  compileOnly libraries.osgi_bundle_versioning
 }

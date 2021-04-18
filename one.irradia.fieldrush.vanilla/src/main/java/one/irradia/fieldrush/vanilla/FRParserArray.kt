@@ -12,14 +12,14 @@ import one.irradia.fieldrush.api.FRValueParserType
 class FRParserArray<T>(
   receiver: (FRParserContextType, List<T>) -> Unit,
   private val onIndicesCompleted: (FRParserContextType) -> FRParseResult<List<T>>,
-  private val forIndex: (FRParserContextType, Int) -> FRValueParserType<*>)
-  : FRAbstractParserArray<T>(receiver) {
+  private val forIndex: (FRParserContextType, Int) -> FRValueParserType<*>
+) : FRAbstractParserArray<T>(receiver) {
 
   override fun onCompleted(context: FRParserContextType): FRParseResult<List<T>> {
     return this.onIndicesCompleted.invoke(context)
   }
 
-  override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*>? {
+  override fun forIndex(context: FRParserContextType, index: Int): FRValueParserType<*> {
     return this.forIndex.invoke(context, index)
   }
 }
