@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser
 import one.irradia.fieldrush.api.FRLexicalPosition
 import one.irradia.fieldrush.api.FRParseError
 import one.irradia.fieldrush.api.FRParseResult
+import one.irradia.fieldrush.api.FRParseWarning
 import one.irradia.fieldrush.api.FRParserProviderType
 import one.irradia.fieldrush.api.FRParserType
 import one.irradia.fieldrush.api.FRValueParserProviderType
@@ -83,9 +84,13 @@ class FRParsers : FRParserProviderType {
         )
       }
 
+      val warningLog =
+        mutableListOf<FRParseWarning>()
+
       val context =
         FRParserContext(
           depth = 0,
+          warningLog = warningLog,
           documentURI = this.documentURI,
           jsonStream = jsonStream,
           logger = this.logger,

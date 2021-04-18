@@ -11,16 +11,16 @@ import java.net.URI
 
 internal class FRParserContext internal constructor(
   private val depth: Int,
+  private val warningLog : MutableList<FRParseWarning>,
   override val documentURI: URI,
   override val jsonStream: FRJSONStreamType,
   override val parsers: FRValueParserProviderType,
   private val logger: Logger
 ) : FRParserContextType {
 
-  private val warningLog = mutableListOf<FRParseWarning>()
-
   override fun withNextDepth(): FRParserContextType {
     return FRParserContext(
+      warningLog = this.warningLog,
       depth = this.depth + 1,
       documentURI = this.documentURI,
       jsonStream = this.jsonStream,
@@ -101,5 +101,5 @@ internal class FRParserContext internal constructor(
   }
 
   override val warnings: List<FRParseWarning>
-    get() = this.warningLog
+    get() = this.warningLog.toList()
 }
