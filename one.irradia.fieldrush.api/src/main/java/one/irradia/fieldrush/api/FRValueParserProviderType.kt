@@ -1,6 +1,7 @@
 package one.irradia.fieldrush.api
 
 import one.irradia.mime.api.MIMEType
+import org.joda.time.DateTime
 import org.joda.time.Instant
 import java.math.BigInteger
 import java.net.URI
@@ -115,6 +116,21 @@ interface FRValueParserProviderType {
   fun forTimestamp(receiver: (Instant) -> Unit = ignoringReceiver())
     : FRValueParserType<Instant> =
     this.forTimestampWithContext { _, value -> receiver.invoke(value) }
+
+  /**
+   * Return a parser that consumes a date/time value, in any time zone, converting the result to UTC.
+   */
+
+  fun forDateTimeUTCWithContext(receiver: (FRParserContextType, DateTime) -> Unit = ignoringReceiverWithContext())
+    : FRValueParserType<DateTime>
+
+  /**
+   * Return a parser that consumes a date/time value, in any time zone, converting the result to UTC.
+   */
+
+  fun forDateTimeUTC(receiver: (DateTime) -> Unit = ignoringReceiver())
+    : FRValueParserType<DateTime> =
+    this.forDateTimeUTCWithContext { _, value -> receiver.invoke(value) }
 
   /**
    * Return a parser that consumes a scalar value.
