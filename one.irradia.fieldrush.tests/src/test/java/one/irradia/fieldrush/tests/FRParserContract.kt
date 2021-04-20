@@ -11,7 +11,10 @@ import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.fieldrush.vanilla.FRValueParsers
 import one.irradia.mime.vanilla.MIMEParser
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.Instant
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,6 +30,7 @@ abstract class FRParserContract {
   abstract fun valueParsers(): FRValueParserProviderType
   abstract fun logger(): Logger
 
+  private lateinit var savedTimeZone: DateTimeZone
   private lateinit var parsers: FRParserProviderType
   private lateinit var valueParsers: FRValueParserProviderType
   private lateinit var logger: Logger
@@ -57,6 +61,12 @@ abstract class FRParserContract {
     this.parsers = this.parsers()
     this.valueParsers = this.valueParsers()
     this.logger = this.logger()
+    this.savedTimeZone = DateTimeZone.getDefault()
+  }
+
+  @AfterEach
+  fun testTearDown() {
+    DateTimeZone.setDefault(this.savedTimeZone)
   }
 
   class IgnoreAll : FRAbstractParserObject<Unit>(onReceive = FRValueParsers.ignoringReceiverWithContext()) {
@@ -897,6 +907,156 @@ abstract class FRParserContract {
       val success = result as FRParseResult.FRParseSucceeded
       val parsed = success.result
       Assertions.assertEquals(null, parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeBad0() {
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("mime-ok-0.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val failed = result as FRParseResult.FRParseFailed
+      Assertions.assertEquals(1, failed.errors.size)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK0_UTC() {
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-0.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK0_UTC_Plus5() {
+    DateTimeZone.setDefault(DateTimeZone.forOffsetHours(5))
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-0.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10Z"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK1_UTC() {
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-1.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK1_UTC_Plus5() {
+    DateTimeZone.setDefault(DateTimeZone.forOffsetHours(5))
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-1.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10Z"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK2_UTC() {
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-2.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK2_UTC_Plus5() {
+    DateTimeZone.setDefault(DateTimeZone.forOffsetHours(5))
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-2.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T00:00:10Z"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK3_UTC() {
+    DateTimeZone.setDefault(DateTimeZone.UTC)
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-3.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T05:00:10"), parsed)
+    }
+  }
+
+  @Test
+  fun testDateTimeOK3_UTC_Minus5() {
+    DateTimeZone.setDefault(DateTimeZone.forOffsetHours(-5))
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("datetime-ok-3.json"),
+      rootParser = FRValueParsers.forDateTimeUTC()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val success = result as FRParseResult.FRParseSucceeded
+      val parsed = success.result
+      Assertions.assertEquals(DateTime.parse("2010-01-01T05:00:10Z"), parsed)
     }
   }
 }

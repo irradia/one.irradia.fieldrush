@@ -11,6 +11,7 @@ import one.irradia.fieldrush.api.FRValueParserProviderType
 import one.irradia.fieldrush.api.FRValueParserType
 import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
+import org.joda.time.DateTime
 import org.joda.time.Instant
 import java.math.BigInteger
 import java.net.URI
@@ -24,6 +25,9 @@ object FRValueParsers : FRValueParserProviderType {
   override fun forTimestampWithContext(
     receiver: (FRParserContextType, Instant) -> Unit): FRValueParserType<Instant> =
     FRValueParserTimestamp(receiver)
+
+  override fun forDateTimeUTCWithContext(receiver: (FRParserContextType, DateTime) -> Unit): FRValueParserType<DateTime> =
+    FRValueParserDateTimeUTC(receiver)
 
   override fun <T> forObjectMapWithContext(
     forKey: (FRParserContextType, String) -> FRValueParserType<T>,
