@@ -2,6 +2,7 @@ package one.irradia.fieldrush.vanilla
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.core.io.JsonEOFException
 import one.irradia.fieldrush.api.FRJSONStreamType
 import one.irradia.fieldrush.api.FRLexicalPosition
 import one.irradia.fieldrush.api.FRParseError
@@ -50,18 +51,24 @@ internal class FRJSONStream(
         warnings = listOf(),
         x = this.currentTokenVar
       )
+    } catch (e: JsonEOFException) {
+      this.currentTokenVar = null
+      this.error(e)
     } catch (e: Exception) {
-      FRParseFailed(
-        warnings = listOf(),
-        errors = listOf(
-          FRParseError(
-            "core",
-            this.currentPosition,
-            message = e.message ?: "JSON parsing failed",
-            exception = e)
-        ))
+      this.error(e)
     }
   }
+
+  private fun <T> error(e: Exception): FRParseResult<T> =
+    FRParseFailed<T>(
+      warnings = listOf(),
+      errors = listOf(
+        FRParseError(
+          "core",
+          this.currentPosition,
+          message = e.message ?: "JSON parsing failed",
+          exception = e)
+      ))
 
   override fun skip(): FRParseResult<Unit> {
     return try {
@@ -79,16 +86,11 @@ internal class FRJSONStream(
       }
 
       this.nextToken().map { }
+    } catch (e: JsonEOFException) {
+      this.currentTokenVar = null
+      this.error(e)
     } catch (e: Exception) {
-      FRParseFailed(
-        warnings = listOf(),
-        errors = listOf(
-          FRParseError(
-            "core",
-            this.currentPosition,
-            message = e.message ?: "JSON parsing failed",
-            exception = e)
-        ))
+      this.error(e)
     }
   }
 }
