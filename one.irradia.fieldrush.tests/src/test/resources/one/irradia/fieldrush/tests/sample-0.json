@@ -1,0 +1,28 @@
+{
+  "metadata" : {
+    "title" : "SimplyE Library Registry"
+  },
+
+  "links" : [
+    {
+      "title" : "Libraries near me",
+      "rel" : "http://librarysimplified.org/terms/rel/nearby",
+      "href" : "https://libraryregistry.librarysimplified.org/nearby{?location,stage}",
+      "type" : "application/opds+json;profile=http://librarysimplified.org/rel/profile/directory"
+    },
+
+    {
+      "rel": "search",
+      "title": "Find my library",
+      "href" : "https://libraryregistry.librarysimplified.org/search{?query,location,stage}",
+      "type" : "application/opds+json;profile=http://librarysimplified.org/rel/profile/directory"
+    },
+
+    {
+      "rel": "register",
+      "title": "Register a library",
+      "href": "https://libraryregistry.librarysimplified.org/register",
+      "type": "application/opds+json;profile=http://librarysimplified.org/rel/profile/directory",
+    }
+  ]
+}

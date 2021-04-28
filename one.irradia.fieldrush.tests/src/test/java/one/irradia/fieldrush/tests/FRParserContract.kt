@@ -1059,4 +1059,19 @@ abstract class FRParserContract {
       Assertions.assertEquals(DateTime.parse("2010-01-01T05:00:10Z"), parsed)
     }
   }
+
+  @Test
+  fun testNonTermination() {
+    DateTimeZone.setDefault(DateTimeZone.forOffsetHours(-5))
+
+    this.parsers.createParser(
+      uri = URI.create("urn:test"),
+      stream = resource("sample-0.json"),
+      rootParser = FRValueParsers.ignores()).use { parser ->
+      val result = parser.parse()
+      this.dumpParseResult(result)
+
+      val failure = result as FRParseResult.FRParseFailed
+    }
+  }
 }
